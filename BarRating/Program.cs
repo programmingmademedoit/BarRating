@@ -1,6 +1,10 @@
 using BarRating.Data;
 using BarRating.Data.Entities;
+using BarRating.Repository;
 using BarRating.Service;
+using BarRating.Service.Bar;
+using BarRating.Service.Photo;
+using BarRating.Service.Review;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +15,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddScoped<BarRepository>();
+builder.Services.AddScoped<IBarService, BarService>();
+
+builder.Services.AddScoped<ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<UserRepository>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
@@ -41,7 +54,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Bar}/{action=Index}/{id?}");
 app.MapRazorPages();
 using (var scope = app.Services.CreateScope())
 {

@@ -1,0 +1,114 @@
+﻿@using BarRating.Models.Review
+@model BarRating.Models.Review.ReviewViewModel
+
+@{
+    ViewData["Title"] = "Bar Reviews";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .restaurant-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .restaurant-description {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .review-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .review-author {
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .review-text {
+            margin-top: 5px;
+        }
+
+        .no-reviews {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+            .search-bar input {
+                border-radius: 20px;
+                padding: 10px 15px;
+            }
+
+            .search-bar button {
+                border-radius: 20px;
+                padding: 10px 15px;
+            }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="restaurant-header">
+            <h1 class="display-4">@Model.Name</h1>
+            <p class="restaurant-description">@Model.Description</p>
+        </div>
+        @if(User.Identity.IsAuthenticated)
+        {
+            <div class="mb-4">
+                <a asp-controller="Review" asp-action="Create" asp-route-barId="@Model.BarId" class="btn btn-primary mr-2">Create Review</a>
+            </div>
+        }
+
+        <div class="search-bar">
+            <form asp-controller="Review" asp-action="SearchReview" method="get" class="form-inline justify-content-center">
+                <input type="text" name="searchQuery" value="@ViewData["CurrentFilter"]" class="form-control mr-2" placeholder="Search reviews..." style="width: 300px;">
+                <input type="hidden" name="id" value="@Model.BarId" />
+                <button type="submit" class="btn btn-secondary">Search</button>
+            </form>
+        </div>
+
+        <h2 class="mb-4">Reviews</h2>
+
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            <ul class="list-unstyled">
+                @foreach (var review in Model.Reviews)
+                {
+                    <li class="review-item">
+                        <div class="review-author">@review.Author?.UserName</div>
+                        <div class="review-text">@review.Text</div>
+                        @if (User.IsInRole("Admin") || User.Identity.Name == @review.Author?.UserName)
+                        {
+                            <a asp-controller="Review" asp-action="Edit" asp-route-id="@review.Id" asp-route-barId="@Model.BarId" class="btn btn-primary mr-2">Edit</a>
+                            <a asp-controller="Review" asp-action="Delete" asp-route-id="@review.Id" asp-route-barId="@Model.BarId" class="btn btn-danger">Delete</a>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="no-reviews">No reviews available.</p>
+        }
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

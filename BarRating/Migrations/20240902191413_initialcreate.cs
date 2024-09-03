@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BarRating.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initialcreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -189,7 +189,7 @@ namespace BarRating.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RestaurantId = table.Column<int>(type: "int", nullable: false),
+                    BarId = table.Column<int>(type: "int", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedById = table.Column<int>(type: "int", nullable: false),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -204,8 +204,8 @@ namespace BarRating.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Reviews_Bars_RestaurantId",
-                        column: x => x.RestaurantId,
+                        name: "FK_Reviews_Bars_BarId",
+                        column: x => x.BarId,
                         principalTable: "Bars",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -256,14 +256,14 @@ namespace BarRating.Migrations
                 column: "CreatedById");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reviews_BarId",
+                table: "Reviews",
+                column: "BarId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reviews_CreatedById",
                 table: "Reviews",
                 column: "CreatedById");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reviews_RestaurantId",
-                table: "Reviews",
-                column: "RestaurantId");
         }
 
         /// <inheritdoc />

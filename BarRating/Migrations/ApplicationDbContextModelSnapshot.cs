@@ -63,14 +63,14 @@ namespace BarRating.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("BarId")
+                        .HasColumnType("int");
+
                     b.Property<int>("CreatedById")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("RestaurantId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -78,9 +78,9 @@ namespace BarRating.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedById");
+                    b.HasIndex("BarId");
 
-                    b.HasIndex("RestaurantId");
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Reviews");
                 });
@@ -311,21 +311,21 @@ namespace BarRating.Migrations
 
             modelBuilder.Entity("BarRating.Data.Entities.Review", b =>
                 {
+                    b.HasOne("BarRating.Data.Entities.Bar", "Bar")
+                        .WithMany("Reviews")
+                        .HasForeignKey("BarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BarRating.Data.Entities.User", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("BarRating.Data.Entities.Bar", "Restaurant")
-                        .WithMany("Reviews")
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Bar");
 
                     b.Navigation("CreatedBy");
-
-                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

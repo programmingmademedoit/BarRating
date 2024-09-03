@@ -1,0 +1,42 @@
+﻿@model BarRating.Models.Review.CreateReviewViewModel
+
+@{
+    ViewData["Title"] = "Create Review";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Create a Review</h2>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Review" asp-action="Create" method="post">
+                        <!-- Hidden field for BarId -->
+                        <input type="hidden" asp-for="BarId" />
+
+                        <div class="form-group">
+                            <label asp-for="Text" class="form-label">Your Review</label>
+                            <textarea asp-for="Text" class="form-control" rows="5" placeholder="Write your review here..."></textarea>
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-secondary">
+                                Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Include validation scripts -->
+    <partial name="_ValidationScriptsPartial" />
+}
+
