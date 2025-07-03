@@ -15,7 +15,7 @@ namespace BarRating.Data.Entities
 
 		public MetadataBaseEntity()
 		{
-			CreatedOn = DateTime.Now;
+			CreatedOn = DateTime.UtcNow;
 		}
 	}
 }

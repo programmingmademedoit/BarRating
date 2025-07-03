@@ -6,5 +6,7 @@ namespace BarRating.Data.Entities
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public Rank Rank { get; set; }
+        public bool IsVerified { get; set; } = false;
     }
 }

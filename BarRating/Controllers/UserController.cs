@@ -198,7 +198,7 @@ namespace BarRating.Controllers
             }
 
             // Optionally, return to a view that displays the errors
-            return View("Error"); // You might want to create an error view
+            return View("Error"); // You might wa
         }
 
     }

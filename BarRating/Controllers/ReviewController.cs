@@ -125,7 +125,6 @@ namespace BarRating.Controllers
         {
             ViewData["CurrentFilter"] = searchQuery;
 
-            // Fetch the bar by ID
             var bar = barRepository.GetBarById(id);
             if (bar == null)
             {
@@ -133,31 +132,28 @@ namespace BarRating.Controllers
                 return RedirectToAction("Index", "Bar");
             }
 
-            // Check if searchQuery is null or empty
             if (string.IsNullOrEmpty(searchQuery))
             {
                 TempData["BarId"] = id;
                 return RedirectToAction("NoResults", "Bar");
             }
 
-            // Filter reviews based on searchQuery
-            var filteredComments = bar.Reviews
+            var filteredReviews = bar.Reviews
                 .Where(r => r.Text.StartsWith(searchQuery, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            if (!filteredComments.Any())
+            if (!filteredReviews.Any())
             {
                 TempData["BarId"] = id;
                 return RedirectToAction("NoResults", "Bar");
             }
 
-            // Create the view model
             var viewModel = new ReviewViewModel
             {
                 BarId = bar.Id,
                 Name = bar.Name,
                 Description = bar.Description,
-                Reviews = filteredComments.Select(r => reviewService.GetSpecifyPage(r)).ToList()
+                Reviews = filteredReviews.Select(r => reviewService.GetSpecifyPage(r)).ToList()
             };
 
             TempData["BarId"] = id;

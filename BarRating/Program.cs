@@ -61,7 +61,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    var roles = new[] { "Admin", "User" };
+    var roles = new[] { "Admin","Moderator", "User" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))

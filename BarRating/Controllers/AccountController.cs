@@ -52,12 +52,8 @@ namespace BarRating.Controllers
 
             }
 
-            // will be executed if model is invalid or login has failed
-            var errors = ModelState.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList()
-            );
-            return Json(new { success = false, errors });
+            TempData["Error"] = "Wrong credentials. Please try again";
+            return RedirectToAction("Login", "Account");
         }
 
         [HttpGet]

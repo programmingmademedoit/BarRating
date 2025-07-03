@@ -64,7 +64,7 @@ namespace BarRating.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateBarViewModel model)
         {
-            if(!ModelState.IsValid && model.BarId != 0)
+            if(!ModelState.IsValid)
             {
                 return View(model);
             }
@@ -111,7 +111,6 @@ namespace BarRating.Controllers
                 return View("Error");
             }
 
-            // Handle the image upload
             string newImageUrl = existingBar.Image;
             if (model.Image != null)
             {
@@ -122,7 +121,6 @@ namespace BarRating.Controllers
                     return View(model);
                 }
 
-                // Delete the old image if it exists
                 if (!string.IsNullOrEmpty(existingBar.Image))
                 {
                     await photoService.DeletePhotoAsync(existingBar.Image);
@@ -131,14 +129,12 @@ namespace BarRating.Controllers
                 newImageUrl = photoResult.Url.ToString();
             }
 
-            // Update the existing restaurant's properties
             existingBar.Name = model.Name;
             existingBar.Description = model.Description;
             existingBar.Image = newImageUrl;
             existingBar.CreatedById = model.CreatedById;
             existingBar.CreatedBy = userRepository.GetUserById(existingBar.CreatedById);
 
-            // Save changes to the repository
             await barRepository.Edit(existingBar);
 
             return RedirectToAction("Index", "Bar", new { id = model.BarId });
