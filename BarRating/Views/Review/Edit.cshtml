@@ -1,29 +1,94 @@
-﻿@model BarRating.Models.Review.EditReviewViewModel
-
+﻿
+@using BarRating.Data.Enums
+@model BarRating.Models.Review.EditReviewViewModel
 @{
-    ViewData["Title"] = "Edit Review";
+    ViewData["Title"] = "Edit Your Review";
 }
 
-<div class="container">
+<div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-primary">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-white">
+                    <h5>Edit Review</h5>
+                </div>
                 <div class="card-body">
-                    <h2 class="card-title text-center mb-4 text-primary">Edit Review</h2>
-                    <form asp-controller="Review" asp-action="Edit" method="post" enctype="multipart/form-data">
-                        <!-- Hidden field for Bar ID -->
-                        <input type="hidden" asp-for="@Model.BarId" value="@Model.BarId" />
-                        <input type="hidden" asp-for="@Model.ReviewId" value="@Model.ReviewId" />
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="BarId" />
 
-
+                        <!-- Rating -->
                         <div class="mb-3">
-                            <label for="Text" class="form-label">Text</label>
-                            <textarea class="form-control" id="Text" name="Text" rows="5" required>@Model.Text</textarea>
+                            <label asp-for="Rating" class="form-label">Your Rating</label>
+                            <select asp-for="Rating" class="form-control" required>
+                                <option value="">Select a rating...</option>
+                                <option value="5">⭐⭐⭐⭐⭐ - Excellent</option>
+                                <option value="4">⭐⭐⭐⭐ - Good</option>
+                                <option value="3">⭐⭐⭐ - Average</option>
+                                <option value="2">⭐⭐ - Poor</option>
+                                <option value="1">⭐ - Terrible</option>
+                            </select>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
                         </div>
 
+                        <!-- Review Text -->
+                        <div class="mb-3">
+                            <label asp-for="Text" class="form-label">Review</label>
+                            <textarea asp-for="Text" class="form-control" rows="5" maxlength="1000" required></textarea>
+                            <span asp-validation-for="Text" class="text-danger"></span>
+                            <small class="form-text text-muted">Max 1000 characters.</small>
+                        </div>
+
+                        <!-- Price Category -->
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label">Price Category</label>
+                            <select asp-for="Price"
+                                    asp-items="Html.GetEnumSelectList<PriceCategory>()"
+                                    class="form-control">
+                                <option value="">Select price...</option>
+                            </select>
+                        </div>
+
+                        <!-- Number of People -->
+                        <div class="mb-3">
+                            <label asp-for="NumberOfPeople" class="form-label">How many people were in your group?</label>
+                            <input asp-for="NumberOfPeople" type="number" class="form-control" min="1" max="50" />
+                            <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
+                            <small class="form-text text-muted">Optional: 1–50 people.</small>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-3">
+                            <label>What describes this visit?</label>
+                            <div class="row g-2">
+                                @foreach (var tag in Enum.GetValues<Tags>())
+                                {
+                                    if (tag == Tags.None) continue;
+
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input"
+                                                   type="checkbox"
+                                                   name="Tags"
+                                                   value="@((int)tag)"
+                                                   id="tag_@((int)tag)"
+                                            @(Model.Tags?.Contains(tag) == true ? "checked" : "") />
+                                            <label class="form-check-label" for="tag_@((int)tag)">
+                                                @tag.GetDisplayName()
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <small class="form-text text-muted">Select all that apply.</small>
+                        </div>
+
+                        <!-- Submit -->
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
-                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-secondary mr-2">Edit Review</a>
+                            <button type="submit" class="btn btn-warning">Update Review</button>
+                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -31,3 +96,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

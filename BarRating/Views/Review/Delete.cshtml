@@ -1,74 +1,41 @@
-﻿@using BarRating.Models.Review
-@model BarRating.Models.Review.DeleteReviewViewModel
-
+﻿@model BarRating.Models.Review.DeleteReviewViewModel
 @{
     ViewData["Title"] = "Delete Review";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4>Confirm Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-danger">
+                        Are you sure you want to delete your review?
+                    </p>
 
-        .confirmation-box {
-            background-color: #ffffff;
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-        }
+                  
 
-        .review-text {
-            font-size: 1.1rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
+                    <p class="text-muted">
+                        This action cannot be undone.
+                    </p>
 
-        .review-author {
-            font-weight: bold;
-            color: #343a40;
-        }
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="ReviewId" />
+                        <input type="hidden" asp-for="BarId" />
 
-        .action-buttons {
-            margin-top: 20px;
-        }
-
-        .btn-danger {
-            margin-right: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="confirmation-box">
-                    <h2 class="text-center text-danger">Delete Review</h2>
-                    <p>Are you sure you want to delete this review? </p>
-
-
-
-                    <div class="action-buttons">
-                        <form asp-controller="Review" asp-action="Delete" method="post">
-                            <input type="hidden" asp-for="ReviewId" />
-                            <input type="hidden" asp-for="BarId" />
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-secondary">Cancel</a>
-                        </form>
-                    </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                Yes, Delete Review
+                            </button>
+                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
-
+</div>

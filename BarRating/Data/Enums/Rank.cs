@@ -1,4 +1,4 @@
-﻿namespace BarRating.Data.Entities
+﻿namespace BarRating.Data.Enums
 {
     public enum Rank
     {

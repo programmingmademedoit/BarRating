@@ -33,8 +33,8 @@ namespace BarRating.Migrations
                     b.Property<bool>("AcceptsReservations")
                         .HasColumnType("bit");
 
-                    b.Property<int>("AverageSpent")
-                        .HasColumnType("int");
+                    b.Property<double>("AverageRating")
+                        .HasColumnType("float");
 
                     b.Property<int>("BarType")
                         .HasColumnType("int");
@@ -60,12 +60,6 @@ namespace BarRating.Migrations
 
                     b.Property<bool>("HasParking")
                         .HasColumnType("bit");
-
-                    b.Property<string>("HolidayWeekENDSchedule")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HolidayWeekSchedule")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -94,29 +88,16 @@ namespace BarRating.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OpenDaysCsv")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("OwnerId")
                         .HasColumnType("int");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PriceCategory")
                         .HasColumnType("int");
 
                     b.Property<string>("Website")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WeekENDSchedule")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WeekSchedule")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -128,7 +109,37 @@ namespace BarRating.Migrations
                     b.ToTable("Bars");
                 });
 
-            modelBuilder.Entity("BarRating.Data.Entities.Comment", b =>
+            modelBuilder.Entity("BarRating.Data.Entities.BarSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BarId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("Closing")
+                        .HasColumnType("time");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("Opening")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BarId");
+
+                    b.ToTable("Schedules");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.HelpfulVote", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -142,18 +153,8 @@ namespace BarRating.Migrations
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EditedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsEdited")
-                        .HasColumnType("bit");
-
                     b.Property<int>("ReviewId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -161,7 +162,7 @@ namespace BarRating.Migrations
 
                     b.HasIndex("ReviewId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("HelpfulVotes");
                 });
 
             modelBuilder.Entity("BarRating.Data.Entities.Review", b =>
@@ -184,31 +185,30 @@ namespace BarRating.Migrations
                     b.Property<DateTime?>("EditedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsEdited")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsOwner")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("NumberOfPeople")
                         .HasColumnType("int");
 
-                    b.Property<int>("Price")
+                    b.Property<DateTime?>("OwnerRepliedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OwnerReply")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("OwnerReplyEditedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("Price")
                         .HasColumnType("int");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
                     b.Property<string>("Tags")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("WasThisHelpful")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -247,6 +247,66 @@ namespace BarRating.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.SavedBar", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BarId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedById")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BarId");
+
+                    b.HasIndex("CreatedById");
+
+                    b.ToTable("SavedBars");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.ScheduleOverride", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BarId")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("Closing")
+                        .HasColumnType("time");
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
+                    b.Property<TimeSpan>("Opening")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BarId");
+
+                    b.ToTable("ScheduleOverrides");
                 });
 
             modelBuilder.Entity("BarRating.Data.Entities.User", b =>
@@ -455,7 +515,18 @@ namespace BarRating.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("BarRating.Data.Entities.Comment", b =>
+            modelBuilder.Entity("BarRating.Data.Entities.BarSchedule", b =>
+                {
+                    b.HasOne("BarRating.Data.Entities.Bar", "Bar")
+                        .WithMany("Schedules")
+                        .HasForeignKey("BarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bar");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.HelpfulVote", b =>
                 {
                     b.HasOne("BarRating.Data.Entities.User", "CreatedBy")
                         .WithMany()
@@ -464,7 +535,7 @@ namespace BarRating.Migrations
                         .IsRequired();
 
                     b.HasOne("BarRating.Data.Entities.Review", "Review")
-                        .WithMany("Comments")
+                        .WithMany("HelpfulVotes")
                         .HasForeignKey("ReviewId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -491,6 +562,36 @@ namespace BarRating.Migrations
                     b.Navigation("Bar");
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.SavedBar", b =>
+                {
+                    b.HasOne("BarRating.Data.Entities.Bar", "Bar")
+                        .WithMany("SavedBars")
+                        .HasForeignKey("BarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BarRating.Data.Entities.User", "CreatedBy")
+                        .WithMany("SavedBars")
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Bar");
+
+                    b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.ScheduleOverride", b =>
+                {
+                    b.HasOne("BarRating.Data.Entities.Bar", "Bar")
+                        .WithMany("ScheduleOverrides")
+                        .HasForeignKey("BarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bar");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -547,11 +648,22 @@ namespace BarRating.Migrations
             modelBuilder.Entity("BarRating.Data.Entities.Bar", b =>
                 {
                     b.Navigation("Reviews");
+
+                    b.Navigation("SavedBars");
+
+                    b.Navigation("ScheduleOverrides");
+
+                    b.Navigation("Schedules");
                 });
 
             modelBuilder.Entity("BarRating.Data.Entities.Review", b =>
                 {
-                    b.Navigation("Comments");
+                    b.Navigation("HelpfulVotes");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.User", b =>
+                {
+                    b.Navigation("SavedBars");
                 });
 #pragma warning restore 612, 618
         }

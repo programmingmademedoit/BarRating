@@ -3,8 +3,11 @@ using BarRating.Data.Entities;
 using BarRating.Repository;
 using BarRating.Service;
 using BarRating.Service.Bar;
+using BarRating.Service.HelpfulVote;
 using BarRating.Service.Photo;
 using BarRating.Service.Review;
+using BarRating.Service.SavedBar;
+using BarRating.Service.Schedule;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +21,16 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<BarRepository>();
 builder.Services.AddScoped<IBarService, BarService>();
+
+builder.Services.AddScoped<BarScheduleRepository>();
+builder.Services.AddScoped<ScheduleOverrideRepository>();
+builder.Services.AddScoped<IScheduleService, ScheduleService>();
+
+builder.Services.AddScoped<HelpfulVoteRepository>();
+builder.Services.AddScoped<IHelpfulVoteService, HelpfulVoteService>();
+
+builder.Services.AddScoped<SavedBarRepository>();
+builder.Services.AddScoped<ISavedBarService, SavedBarService>();
 
 builder.Services.AddScoped<ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -61,7 +74,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
 
-    var roles = new[] { "Admin","Moderator", "User" };
+    var roles = new[] { "Admin","Moderator","Owner", "User" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))

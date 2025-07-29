@@ -11,7 +11,6 @@ namespace BarRating.Repository
         public List<Bar> GetAllBars()
         {
             return context.Bars
-                .Include(b => b.CreatedBy)
                 .Include(b => b.Reviews)
                 .ToList();
         }

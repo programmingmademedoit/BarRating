@@ -2,6 +2,7 @@
 using BarRating.Data.Entities;
 using BarRating.Models.User;
 using BarRating.Repository;
+using BarRating.Service.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,49 +11,30 @@ namespace BarRating.Controllers
     public class UserController : Controller
     {
         private readonly UserRepository userRepository;
+        private readonly IUserService userService;
         private readonly UserManager<User> userManager;
         private readonly RoleManager<Role> roleManager;
         private readonly ApplicationDbContext context;
         public UserController(UserRepository userRepository,
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context,
+            IUserService userService)
         {
             this.userRepository = userRepository;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.context = context;
+            this.userService = userService;
         }
         [HttpGet]
         public async Task<IActionResult> EditRole(int userId)
         {
-            var user = userRepository.GetUserById(userId);
-            if (user == null)
+            EditUserRoleViewModel model = await userService.EditRole(userId);
+            if (model == null)
             {
                 return NotFound();
             }
-
-            // Get role names for the user
-            var userRoleNames = await userManager.GetRolesAsync(user);
-
-            // Convert role names to role IDs
-            var userRoleIds = roleManager.Roles
-                .Where(r => userRoleNames.Contains(r.Name))
-                .Select(r => r.Id)
-                .ToList();
-
-            // Fetch all roles
-            var allRoles = roleManager.Roles.ToList();
-
-            var model = new EditUserRoleViewModel
-            {
-                UserId = user.Id,
-                UserName = user.UserName,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                UserRoles = userRoleIds,  // Use role IDs here
-                AllRoles = allRoles
-            };
 
             return View(model);
         }

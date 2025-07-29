@@ -1,0 +1,36 @@
+﻿@model BarRating.Models.Reply.ReplyViewModel
+@{
+    ViewData["Title"] = "Delete Reply";
+}
+
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">Delete Reply</h5>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete your reply?</p>
+            <div class="alert alert-light" role="alert">
+                @Model.OwnerReply
+            </div>
+            <p class="text-danger">
+                <small>This action cannot be undone.</small>
+            </p>
+        </div>
+        <div class="modal-footer">
+            <form asp-action="DeleteReply" method="post">
+                <input type="hidden" asp-for="ReviewId" />
+                <input type="hidden" asp-for="BarId" />
+
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

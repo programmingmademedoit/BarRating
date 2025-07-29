@@ -1,0 +1,44 @@
+﻿@model BarRating.Models.Reply.ReplyViewModel
+@{
+    ViewData["Title"] = "Owner Reply";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5>Owner Reply</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="OwnerReply" method="post">
+                        <input type="hidden" asp-for="ReviewId" />
+                        <input type="hidden" asp-for="BarId" />
+
+                        <div class="mb-3">
+                            <label for="OwnerReply" class="form-label">Your Reply</label>
+                            <textarea asp-for="OwnerReply"
+                                      class="form-control"
+                                      rows="5"
+                                      maxlength="500"
+                                      placeholder="Write a professional response to the review..."></textarea>
+                            <div class="invalid-feedback">Please enter a reply.</div>
+                            <small class="form-text text-muted">Max 500 characters.</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Save Reply</button>
+                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

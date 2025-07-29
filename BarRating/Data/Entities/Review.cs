@@ -1,5 +1,5 @@
 ﻿
-using BarRating.Data.Entities;
+using BarRating.Data.Enums;
 
 namespace BarRating.Data.Entities
 {
@@ -7,31 +7,18 @@ namespace BarRating.Data.Entities
     {
         public int BarId { get; set; }
         public Bar Bar { get; set; }
-
         public string Text { get; set; }
         public int Rating { get; set; }
 
-        public bool WasThisHelpful { get; set; }
-        public bool IsEdited { get; set; } = false;
+        public List<HelpfulVote> HelpfulVotes { get; set; }
         public DateTime? EditedAt { get; set; }
-        public PriceCategory Price { get; set; }
-        public int? NumberOfPeople { get; set; }
-        public bool IsOwner { get; set; } = false;
-        public List<Tags> Tags { get; set; }
+        public PriceCategory? Price { get; set; }
+        public NumberOfPeople? NumberOfPeople { get; set; }
+        public List<Tags>? Tags { get; set; }
 
-        // New: navigation property for comments
-        public ICollection<Comment>? Comments { get; set; } = new List<Comment>();
+        public string? OwnerReply { get; set; }
+        public DateTime? OwnerRepliedAt { get; set; }
+        public DateTime? OwnerReplyEditedAt { get; set; }
     }
 
-    public class Comment : MetadataBaseEntity
-    {
-
-        public int ReviewId { get; set; }
-        public Review Review { get; set; }
-
-        public string Text { get; set; }
-
-        public bool IsEdited { get; set; } = false;
-        public DateTime? EditedAt { get; set; }
-    }
 }

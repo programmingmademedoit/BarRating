@@ -1,8 +1,10 @@
 ﻿using BarRating.Data.Entities;
+using BarRating.Models.Reply;
 using BarRating.Models.Review;
 using BarRating.Repository;
 using BarRating.Service.Bar;
 using BarRating.Service.Review;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,52 +38,52 @@ namespace BarRating.Controllers
         {
 
             CreateReviewViewModel model = new CreateReviewViewModel()
-            {
-                BarId = barId,
+            { 
+                BarId = barId 
             };
+
             return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateReviewViewModel model)
         {
-            User loggedIn = await userManager.GetUserAsync(User);
-            Review newReview = new Review()
+            if (!ModelState.IsValid)
             {
-                
-                Id = model.Id,
-                BarId = model.BarId,
-                Text = model.Text,
-                CreatedBy = loggedIn,
-                CreatedById = loggedIn.Id,
-                CreatedOn = DateTime.Now,
-            };
-            await reviewService.Create(newReview, loggedIn);
-            return RedirectToAction("Specify", "Bar", new {barId = model.BarId});
+                return View(model);
+            }
+            User loggedIn = await userManager.GetUserAsync(User);
+            await reviewService.Create(model, loggedIn);
+            return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            Review review = reviewRepository.GetReviewById(id);
-            EditReviewViewModel model = new EditReviewViewModel()
-            {
-                ReviewId = id,
-                BarId = review.BarId,
-                Text = review.Text,
-            };
+            EditReviewViewModel model = await reviewService.GetEdit(id);
+            var user = await userManager.GetUserAsync(User);
             return View(model);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditReviewViewModel model)
         {
-            Review editedReview = reviewRepository.GetReviewById(model.ReviewId);
-            
-            editedReview.Text = model.Text;
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
 
-            await reviewRepository.Edit(editedReview);
-            return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
+            try
+            {
+                await reviewService.PostEdit(model);
+                return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while updating the review.");
+                return View(model);
+            }
         }
 
         [HttpGet]
@@ -92,7 +94,6 @@ namespace BarRating.Controllers
             {
                 ReviewId = id,
                 BarId = review.BarId,
-                Text = review.Text,
             };
             return View(model);
         }
@@ -115,7 +116,9 @@ namespace BarRating.Controllers
             List<Data.Entities.Review> reviews = reviewRepository.GetAllUserReviews(loggedInUser.Id);
             return View(reviews);
         }
-        public async Task<IActionResult> ReviewsUser(int userId)
+
+
+        /*public async Task<IActionResult> ReviewsUser(int userId)
         {
             List<Data.Entities.Review> review = reviewRepository.GetAllUserReviews(userId);
             return View("UserReviews", review);
@@ -158,8 +161,9 @@ namespace BarRating.Controllers
 
             TempData["BarId"] = id;
             return View("~/Views/Bar/Specify.cshtml", viewModel);
-        }
+        }*/
 
 
     }
+
 }

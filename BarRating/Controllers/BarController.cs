@@ -5,6 +5,7 @@ using BarRating.Repository;
 using BarRating.Service.Bar;
 using BarRating.Service.Photo;
 using BarRating.Service.Review;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,30 +35,15 @@ namespace BarRating.Controllers
         }
         public IActionResult Index()
         {
-            List<Data.Entities.Bar> bars = barRepository.GetAllBars();
-            List<IndexViewModel> index = bars.Select(bar => new IndexViewModel
-            {
-                BarId = bar.Id,
-                Name = bar.Name,
-                Description = bar.Description,
-                Image = bar.Image
-            }).ToList();
 
-            BarViewModel model = new BarViewModel
-            {
-                Bars = index,
-            };
-           
+            BarsViewModel model = barService.Index();
             return View(model);
         }
-        [HttpGet]
-        public IActionResult Create(int id)
-        {
-            CreateBarViewModel model = new CreateBarViewModel()
-            { 
-                BarId = id
-            };
 
+        [HttpGet]
+        public IActionResult Create()
+        {
+            CreateBarViewModel model = new CreateBarViewModel();
             return View(model);
         }
 
@@ -66,114 +52,73 @@ namespace BarRating.Controllers
         {
             if(!ModelState.IsValid)
             {
+                
                 return View(model);
             }
-
             User loggedIn = await userManager.GetUserAsync(User);
 
-            var result = await photoService.AddPhotoAsync(model.Image);
-
-            Data.Entities.Bar bar = new Data.Entities.Bar()
-            {
-                Id = model.BarId,
-                Name = model.Name,
-                Description = model.Description,
-                Image = result.Url.ToString(),
-                CreatedBy = loggedIn,
-                CreatedById = loggedIn.Id,
-                CreatedOn = DateTime.Now,
-            };
-            await barRepository.Create(bar);
-            return RedirectToAction("Index", "Bar", new { id = model.BarId });
+            Bar bar = await barService.Create(model, loggedIn);
+            return RedirectToAction("Specify", "Bar", new { barid = bar.Id });
 
         }
+
         [HttpGet]
-        public IActionResult Edit(int barId)
+        [Authorize(Roles = "Admin,Moderator")]
+        public async Task<IActionResult> Edit(int barId)
         {
-            Bar model = barRepository.GetBarById(barId);
-            var bar = new EditBarViewModel
-            {
-                BarId = barId,
-                Name = model.Name,
-                Description = model.Description,
-                URL = model.Image,
-                CreatedById = model.CreatedById
-            };
-            return View(bar);
+            EditBarViewModel model = await barService.GetEdit(barId);
+            return View(model);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Edit(EditBarViewModel model)
         {
-            Bar existingBar = barRepository.GetBarById(model.BarId);
-            if (existingBar == null)
+            if (!ModelState.IsValid)
             {
-                return View("Error");
+                return View(model);
             }
-
-            string newImageUrl = existingBar.Image;
-            if (model.Image != null)
+            try
             {
-                var photoResult = await photoService.AddPhotoAsync(model.Image);
-                if (photoResult.Error != null)
-                {
-                    ModelState.AddModelError("Image", "Photo upload failed");
-                    return View(model);
-                }
-
-                if (!string.IsNullOrEmpty(existingBar.Image))
-                {
-                    await photoService.DeletePhotoAsync(existingBar.Image);
-                }
-
-                newImageUrl = photoResult.Url.ToString();
+                Bar bar = await barService.PostEdit(model);
+                return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
             }
-
-            existingBar.Name = model.Name;
-            existingBar.Description = model.Description;
-            existingBar.Image = newImageUrl;
-            existingBar.CreatedById = model.CreatedById;
-            existingBar.CreatedBy = userRepository.GetUserById(existingBar.CreatedById);
-
-            await barRepository.Edit(existingBar);
-
-            return RedirectToAction("Index", "Bar", new { id = model.BarId });
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred: " + ex.Message);
+                return View(model);
+            }
         }
         [HttpGet]
+        [Authorize(Roles = "Admin,Moderator")]
         public IActionResult Delete(int barId)
         {
             Bar bar = barRepository.GetBarById(barId);
             DeleteBarViewModel model = new DeleteBarViewModel()
             {
-                BarId = barId,
-                Name = bar.Name,
+                BarId = barId
             };
             return View(model);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Delete(DeleteBarViewModel model)
         {
             Bar deletedBar = barRepository.GetBarById(model.BarId);
-            deletedBar.Id = model.BarId;
-            deletedBar.Name = model.Name;
-            await barRepository.Delete(deletedBar);
+            await barService.Delete(deletedBar);
             return RedirectToAction("Index", "Bar");
         }
 
-        public IActionResult Specify(int barId)
+        public async Task<IActionResult> Specify(int barId)
         {
-            Bar bar = barRepository.GetBarById(barId);
-            ReviewViewModel model = new ReviewViewModel()
-            {
-                BarId = barId,
-                Name = bar.Name,
-                Description = bar.Description,
-                Reviews = bar.Reviews.Select(r => reviewService.GetSpecifyPage(r)) 
-            };
+            Data.Entities.User user = await userManager.GetUserAsync(User);
+            BarDetailViewModel model = barService.Specify(barId, user.Id);
             return View(model);
 
         }
-        public async Task<IActionResult> Search(string searchQuery)
+        /*public async Task<IActionResult> Search(string searchQuery)
         {
             ViewData["CurrentFilter"] = searchQuery;
 
@@ -217,7 +162,7 @@ namespace BarRating.Controllers
                 };
                 return View(model);
             }
-        }
+        }*/
 
     }
 }

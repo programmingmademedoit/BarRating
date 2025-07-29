@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BarRating.Data.Entities;
+using BarRating.Data.Enums;
 
 namespace BarRating.Data
 {
@@ -13,23 +14,23 @@ namespace BarRating.Data
 
         public DbSet<Bar> Bars { get; set; }
         public DbSet<Review> Reviews { get; set; }
-        public DbSet<Comment> Comments { get; set; }
+        public DbSet<HelpfulVote> HelpfulVotes { get; set; }
+        public DbSet<SavedBar> SavedBars { get; set; }
+        public DbSet<BarSchedule> Schedules { get; set; }
+        public DbSet<ScheduleOverride> ScheduleOverrides { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Bar relationships
+           /* // Configure Bar relationships
             modelBuilder.Entity<Bar>()
                 .HasMany(b => b.Reviews)
                 .WithOne(r => r.Bar)
                 .HasForeignKey(r => r.BarId);
 
-            // Configure Review relationships
-            modelBuilder.Entity<Review>()
-                .HasMany(r => r.Comments)
-                .WithOne(c => c.Review)
-                .HasForeignKey(c => c.ReviewId);
 
             // Convert Enums to Integers
             modelBuilder.Entity<Bar>()
@@ -75,9 +76,8 @@ namespace BarRating.Data
                 .HasConversion(
                     v => System.Text.Json.JsonSerializer.Serialize(v, new System.Text.Json.JsonSerializerOptions()),
                     v => System.Text.Json.JsonSerializer.Deserialize<DailySchedule>(v, new System.Text.Json.JsonSerializerOptions()))
-                .HasColumnType("nvarchar(max)");
+                .HasColumnType("nvarchar(max)");*/
 
-            // Optional: Seed Roles and Admin User via Seeding Logic if needed
         }
     }
 }

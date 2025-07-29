@@ -1,6 +1,6 @@
 ﻿namespace BarRating.Models.Bar
 {
-    public class BarViewModel
+    public class BarsViewModel
     {
         public List<IndexViewModel> Bars { get; set; } 
     }

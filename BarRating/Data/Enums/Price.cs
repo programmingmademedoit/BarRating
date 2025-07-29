@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BarRating.Data.Entities
+namespace BarRating.Data.Enums
 {
     public enum PriceCategory
     {
@@ -26,6 +26,8 @@ namespace BarRating.Data.Entities
         From90to100 = 9,
         [Display(Name = "More than 100")]
         MoreThan100 = 10,
+        [Display(Name = "None")]
+        None = 11
 
     }
 }
