@@ -1,0 +1,293 @@
+﻿
+@model BarRating.Models.Bar.CreateBarViewModel
+
+@{
+    ViewData["Title"] = "Create New Bar";
+}
+
+<div class="container mt-5">
+    <h2>Create New Bar</h2>
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-8">
+
+                <!-- Basic Info -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" required />
+                            <div class="invalid-feedback">Name is required.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+                            <div class="invalid-feedback">Description is required.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label"></label>
+                            <input asp-for="Image" type="file" class="form-control" accept="image/*" required />
+                            <div class="invalid-feedback">An image is required.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location & Contact -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Location & Contact</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Location" class="form-label"></label>
+                            <input asp-for="Location" class="form-control" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Latitude" class="form-label"></label>
+                                    <input asp-for="Latitude" class="form-control" step="0.000001" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Longitude" class="form-label"></label>
+                                    <input asp-for="Longitude" class="form-control" step="0.000001" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Website" class="form-label"></label>
+                            <input asp-for="Website" class="form-control" type="url" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Instagram" class="form-label"></label>
+                            <input asp-for="Instagram" class="form-control" placeholder="username" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bar Type -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Bar Type</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="BarType" class="form-label"></label>
+                            <select asp-for="BarType" asp-items="Html.GetEnumSelectList<BarRating.Data.Enums.BarType>()" class="form-control">
+                                <option value="">Select a type...</option>
+                            </select>
+                            <span asp-validation-for="BarType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Regular Schedule (Set Hours for Each Day)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @for (int i = 0; i < 7; i++)
+                            {
+                                var day = (DayOfWeek)i;
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               name="Schedules[@i].IsClosed"
+                                               value="true"
+                                               id="closed-@day" />
+                                        <label class="form-check-label" for="closed-@day">
+                                            <strong>@day</strong> - Closed
+                                        </label>
+                                        <input type="hidden" name="Schedules[@i].DayOfWeek" value="@day" />
+                                    </div>
+                                    <div class="input-group mt-1" id="hours-@day" style="display: flex;">
+                                        <input type="time"
+                                               name="Schedules[@i].Opening"
+                                               class="form-control" />
+                                        <span class="input-group-text">to</span>
+                                        <input type="time"
+                                               name="Schedules[@i].Closing"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <script>
+                            document.querySelectorAll('input[type="checkbox"][class="form-check-input"]').forEach(checkbox => {
+                                const day = checkbox.id.split('-')[1];
+                                const hoursDiv = document.getElementById(`hours-${day}`);
+
+                                checkbox.addEventListener('change', () => {
+                                    hoursDiv.style.display = checkbox.checked ? 'none' : 'flex';
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+
+                <!-- Holiday Overrides -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Holiday or Special Event Hours</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="overrides-container">
+                            <div class="override-group mb-3">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input type="date" name="ScheduleOverrides[0].Date" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="ScheduleOverrides[0].Reason" class="form-control" placeholder="e.g., Christmas" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="input-group">
+                                            <input type="time" name="ScheduleOverrides[0].Opening" class="form-control" />
+                                            <span class="input-group-text">to</span>
+                                            <input type="time" name="ScheduleOverrides[0].Closing" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger remove-override">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="add-override">
+                            + Add Holiday/Special Event
+                        </button>
+
+                        <script>
+                            let overrideIndex = 1;
+                            document.getElementById('add-override').addEventListener('click', function () {
+                                const container = document.getElementById('overrides-container');
+                                const div = document.createElement('div');
+                                div.className = 'override-group mb-3';
+                                div.innerHTML = `
+                                                                <div class="row">
+                                                                    <div class="col-md-3">
+                                                                        <input type="date" name="ScheduleOverrides[${overrideIndex}].Date" class="form-control" />
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        <input type="text" name="ScheduleOverrides[${overrideIndex}].Reason" class="form-control" placeholder="e.g., New Year's Eve" />
+                                                                    </div>
+                                                                    <div class="col-md-5">
+                                                                        <div class="input-group">
+                                                                            <input type="time" name="ScheduleOverrides[${overrideIndex}].Opening" class="form-control" />
+                                                                            <span class="input-group-text">to</span>
+                                                                            <input type="time" name="ScheduleOverrides[${overrideIndex}].Closing" class="form-control" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-1">
+                                                                        <button type="button" class="btn btn-danger remove-override">✕</button>
+                                                                    </div>
+                                                                </div>
+                                                            `;
+                                container.appendChild(div);
+                                overrideIndex++;
+
+                                div.querySelector('.remove-override').addEventListener('click', function () {
+                                    div.remove();
+                                });
+                            });
+
+                            document.querySelectorAll('.remove-override').forEach(button => {
+                                button.addEventListener('click', function () {
+                                    this.closest('.override-group')?.remove();
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Features</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input asp-for="HasLiveMusic" class="form-check-input" type="checkbox" />
+                                    <label asp-for="HasLiveMusic" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="HasFood" class="form-check-input" type="checkbox" />
+                                    <label asp-for="HasFood" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="HasOutdoorSeating" class="form-check-input" type="checkbox" />
+                                    <label asp-for="HasOutdoorSeating" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="AcceptsReservations" class="form-check-input" type="checkbox" />
+                                    <label asp-for="AcceptsReservations" class="form-check-label"></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input asp-for="HasParking" class="form-check-input" type="checkbox" />
+                                    <label asp-for="HasParking" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="IsWheelchairAccessible" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsWheelchairAccessible" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input asp-for="IsVerified" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsVerified" class="form-check-label"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Owner (Admin Only) -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Ownership (Optional)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="OwnerId" class="form-label"></label>
+                            <select asp-for="OwnerId" asp-items="ViewBag.OwnerList" class="form-control">
+                                <option value="">No owner</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">Create Bar</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

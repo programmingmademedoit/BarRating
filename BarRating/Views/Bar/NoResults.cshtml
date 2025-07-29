@@ -1,0 +1,102 @@
+﻿@model BarRating.Models.Review.ReviewViewModel
+
+@{
+    ViewData["Title"] = "Reviews";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviews</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .bar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 10px;
+        }
+
+        .bar-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .bar-image {
+            width: 150px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .bar-text {
+            flex: 2;
+        }
+
+            .bar-text h2 {
+                margin-top: 0;
+                margin-bottom: 10px;
+                color: #333;
+            }
+
+            .bar-text p {
+                margin: 0;
+                color: #666;
+            }
+
+        .bar-reviews {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .review-button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+            .review-button:hover {
+                background-color: #0069d9;
+                color: #fff;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reviews</h1>
+        <form id="searchForm" class="form-inline search-form" asp-controller="Review" asp-action="SearchReview" method="get">
+            <input type="hidden" name="id" value="@Model.BarId" />
+            <input class="form-control mr-sm-2 search-input" type="text" placeholder="Search" aria-label="Search" name="searchQuery">
+            <button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
+        </form>
+    </div>
+
+
+</body>
+</html>
+<div class="no-matches-text">
+    <h3>No matches to your search</h3>
+    <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-secondary">
+        Go Back
+    </a>
+</div>
+
+

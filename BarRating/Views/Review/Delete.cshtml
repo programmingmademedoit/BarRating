@@ -1,0 +1,41 @@
+﻿@model BarRating.Models.Review.DeleteReviewViewModel
+@{
+    ViewData["Title"] = "Delete Review";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card text-center border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4>Confirm Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-danger">
+                        Are you sure you want to delete your review?
+                    </p>
+
+                  
+
+                    <p class="text-muted">
+                        This action cannot be undone.
+                    </p>
+
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="ReviewId" />
+                        <input type="hidden" asp-for="BarId" />
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                Yes, Delete Review
+                            </button>
+                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

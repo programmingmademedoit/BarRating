@@ -1,0 +1,400 @@
+﻿@using BarRating.Models.Bar
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<BarRating.Data.Entities.User> userManager
+
+@model BarDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+    var IsAdmin = User.IsInRole("Admin");
+    var IsModerator = User.IsInRole("Moderator");
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+
+            <!-- Bar Header -->
+            <div class="text-center mb-4">
+                <img src="@Model.Image" class="img-fluid rounded" style="height: 300px; object-fit: cover; width: 100%;" alt="@Model.Name" />
+                <h1>@Model.Name</h1>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <button type="button"
+                            class="btn @(Model.IsSaved ? "btn-danger" : "btn-outline-danger") btn-sm mb-2"
+                            onclick="toggleSaveBar(@Model.BarId, this)">
+                        @(Model.IsSaved ? "❤️ Saved" : "♡ Save Bar")
+                    </button>
+                }
+                <!-- Average Rating -->
+                <div class="mb-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="text-warning">@(i <= Model.AverageRating ? "★" : "☆")</span>
+                    }
+                    <span class="ms-2">@Model.AverageRating.ToString("0.0") (@Model.Reviews?.Count)</span>
+                </div>
+
+                <!-- Price & Verified -->
+                <div>
+                    @if (Model.PriceCategory != BarRating.Data.Enums.PriceCategory.None)
+                    {
+                        <span class="badge bg-primary">@Model.PriceCategory</span>
+                    }
+                    @if (Model.IsVerified)
+                    {
+                        <span class="badge bg-success">Verified</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Back & Admin Actions -->
+            <div class="mb-4 text-center">
+                <a asp-controller="Bar" asp-action="Index" class="btn btn-outline-secondary btn-sm">&larr; Back to All Bars</a>
+                @if (IsAdmin)
+                {
+                    <a asp-controller="Bar" asp-action="Edit" asp-route-barId="@Model.BarId" class="btn btn-warning btn-sm ms-2">Edit</a>
+                    <a asp-controller="Bar" asp-action="Delete" asp-route-barId="@Model.BarId" class="btn btn-danger btn-sm ms-2">Delete</a>
+                }
+            </div>
+
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info">Info</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#schedule">Schedule</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#reviews">Reviews (@Model.Reviews?.Count)</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+
+                <!-- Info Tab -->
+                <div class="tab-pane active show" id="info">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5>Description</h5>
+                            <p>@Model.Description</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Features</h5>
+                            <ul>
+                                @if (Model.HasLiveMusic)
+                                {
+                                    <li>Live Music</li>
+                                }
+                                @if (Model.HasFood)
+                                {
+                                    <li>Food Available</li>
+                                }
+                                @if (Model.HasOutdoorSeating)
+                                {
+                                    <li>Outdoor Seating</li>
+                                }
+                                @if (Model.AcceptsReservations)
+                                {
+                                    <li>Accepts Reservations</li>
+                                }
+                                @if (Model.HasParking)
+                                {
+                                    <li>Parking Available</li>
+                                }
+                                @if (Model.IsWheelchairAccessible)
+                                {
+                                    <li>Wheelchair Accessible</li>
+                                }
+                                @if (!Model.HasLiveMusic && !Model.HasFood && !Model.HasOutdoorSeating &&
+                                !Model.AcceptsReservations && !Model.HasParking && !Model.IsWheelchairAccessible)
+                                {
+                                    <li><em>No special features listed.</em></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Schedule Tab -->
+                <div class="tab-pane" id="schedule">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>Regular Hours</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Hours</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var dayOfWeek in Enum.GetValues<DayOfWeek>())
+                                        {
+                                            var schedule = Model.Schedules.FirstOrDefault(s => s.DayOfWeek == dayOfWeek);
+                                            <tr>
+                                                <td><strong>@dayOfWeek</strong></td>
+                                                <td>
+                                                    @if (schedule?.IsClosed == true)
+                                                    {
+                                                        <span class="text-danger">Closed</span>
+                                                    }
+                                                    else if (schedule != null && schedule.Opening != null && schedule.Closing != null)
+                                                    {
+                                                        <text>
+                                                            @schedule.Opening.ToString("hh\\:mm tt") -
+                                                            @schedule.Closing.ToString("hh\\:mm tt")
+                                                        </text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Not set</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (Model.ScheduleOverrides?.Any() == true)
+                            {
+                                <h6 class="mt-4">Holiday / Special Hours</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Reason</th>
+                                                <th>Hours</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var o in Model.ScheduleOverrides)
+                                            {
+                                                <tr>
+                                                    <td>@o.DayOfWeek.ToString()</td>
+                                                    <td>@o.Reason</td>
+                                                    <td>
+                                                        @if (o.IsClosed)
+                                                        {
+                                                            <span class="text-danger">Closed</span>
+                                                        }
+                                                        else if (o.Opening != null && o.Closing != null)
+                                                        {
+                                                            <text>
+                                                                @o.Opening.ToString("hh\\:mm tt") -
+                                                                @o.Closing.ToString("hh\\:mm tt")
+                                                            </text>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Not set</span>
+                                                        }
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Tab -->
+                <div class="tab-pane" id="reviews">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <h5>Reviews</h5>
+                                <span class="badge bg-secondary">@Model.Reviews?.Count</span>
+                            </div>
+
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a asp-controller="Review" asp-action="Create" asp-route-barId="@Model.BarId" class="btn btn-success btn-sm mb-3">Write a Review</a>
+                            }
+
+                            @if (Model.Reviews != null && Model.Reviews.Count > 0)
+                            {
+                                foreach (var review in Model.Reviews)
+                                {
+                                    <div class="mb-4 border-bottom pb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-1">@review.UserName (@review.UserRank)</h6>
+                                            <div class="text-end">
+                                                <small class="text-muted">Created on: @review.CreatedOn.ToShortDateString()</small>
+                                                @if (review.EditedAt != null)
+                                                {
+                                                    <br />
+                                                    <small class="text-muted">Edited on: @review.EditedAt?.ToShortDateString()</small>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Rating -->
+                                        <div class="mb-2">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <span class="text-warning">@(i <= review.Rating ? "★" : "☆")</span>
+                                            }
+                                        </div>
+
+                                        <!-- Number of People -->
+                                        @if (review.NumberOfPeople > 0)
+                                        {
+                                            <div class="mb-2">
+                                                <span class="badge bg-secondary">👥 @review.NumberOfPeople people</span>
+                                            </div>
+                                        }
+
+                                        <!-- Tags -->
+                                        @if (review.Tags != null && review.Tags.Any(t => t != BarRating.Data.Enums.Tags.None))
+                                        {
+                                            <div class="mb-2">
+                                                @foreach (var tag in review.Tags.Where(t => t != BarRating.Data.Enums.Tags.None))
+                                                {
+                                                    <span class="badge bg-info text-white me-1">@tag.GetDisplayName()</span>
+                                                }
+                                            </div>
+                                        }
+
+                                        <!-- Review Text -->
+                                        <p class="card-text">@review.Text</p>
+
+                                        <!-- Price Spent -->
+                                        @if (review.Price.HasValue)
+                                        {
+                                            <small class="text-muted mb-2">Spent: @review.Price.Value</small>
+                                        }
+
+                                        <!-- Helpful Vote Button -->
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            <button type="button"
+                                                    class="btn @(review.IsHelpfulByCurrentUser ? "btn-success" : "btn-outline-success") btn-sm mt-2"
+                                                    onclick="toggleHelpful(@review.ReviewId, this)">
+                                                @(review.IsHelpfulByCurrentUser ? "👍 Helpful" : "🤍 Helpful") ((@review.HelpfulCount)
+                                            </button>
+                                        }
+
+                                        <!-- Owner Reply -->
+                                        @if (!string.IsNullOrEmpty(review.OwnerReply))
+                                        {
+                                            <div class="mt-3 p-3 bg-light rounded">
+                                                <strong>Owner Reply</strong>
+                                                <p class="mb-1">@review.OwnerReply</p>
+                                                <small class="text-muted">Replied on @review.OwnerRepliedAt?.ToShortDateString()</small>
+                                                @if (review.OwnerReplyEditedAt != null)
+                                                {
+                                                    <small class="text-muted d-block">Edited on @review.OwnerReplyEditedAt?.ToShortDateString()</small>
+                                                }
+                                            </div>
+                                        }
+
+                                        <!-- User Actions -->
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            var user = await userManager.GetUserAsync(User);
+                                            var isAuthor = review.CreatedById == user.Id;
+                                            var isStaff = IsAdmin || IsModerator;
+                                            var isOwner = Model.OwnerId == user.Id;
+
+                                            <!-- Edit/Delete Review -->
+                                            @if (isAuthor || isStaff)
+                                            {
+                                                <div class="mt-2">
+                                                    <a asp-controller="Review" asp-action="Edit" asp-route-id="@review.ReviewId" class="btn btn-warning btn-sm me-1">Edit</a>
+                                                    <a asp-controller="Review" asp-action="Delete" asp-route-id="@review.ReviewId" class="btn btn-danger btn-sm">Delete</a>
+                                                </div>
+                                            }
+
+                                            <!-- Owner Reply -->
+                                            @if (isOwner)
+                                            {
+                                                if (string.IsNullOrEmpty(review.OwnerReply))
+                                                {
+                                                    <a asp-controller="Review" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-outline-primary btn-sm mt-2">Reply as Owner</a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-controller="Review" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-warning btn-sm mt-2 me-1">Edit Reply</a>
+                                                    <a asp-controller="Review" asp-action="DeleteReply" asp-route-reviewId="@review.ReviewId" class="btn btn-danger btn-sm mt-2">Delete Reply</a>
+                                                }
+                                            }
+                                        }
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-muted">No reviews yet. Be the first to leave one!</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        async function toggleSaveBar(barId, button) {
+            const response = await fetch('@Url.Action("SavedBar", "SavedBar")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ barId: barId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.isSaved) {
+                    button.textContent = '❤️ Saved';
+                    button.classList.remove('btn-outline-danger');
+                    button.classList.add('btn-danger');
+                } else {
+                    button.textContent = '♡ Save Bar';
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-outline-danger');
+                }
+            } else {
+                alert(result.message);
+            }
+        }
+
+        async function toggleHelpful(reviewId, button) {
+            const response = await fetch('@Url.Action("HelpfulVote", "Review")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ reviewId: reviewId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const newCount = result.count;
+                const isSaved = result.isSaved;
+
+                button.textContent = `${isSaved ? '👍' : '🤍'} Helpful (${newCount})`;
+                button.classList.toggle('btn-outline-success', !isSaved);
+                button.classList.toggle('btn-success', isSaved);
+            } else {
+                alert(result.message);
+            }
+        }
+    </script>
+}

@@ -1,0 +1,38 @@
+﻿@using BarRating.Data.Entities
+@model List<BarRating.Data.Entities.Review>
+
+@{
+    ViewData["Title"] = "My Reviews";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Bar Name</th>
+                <th>Review Text</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var res in Model)
+            {
+                <tr>
+                    <td>
+                        <form asp-controller="Bar" asp-action="Specify" method="get">
+                            <input type="hidden" name="barId" value="@res.BarId" />
+                            <button type="submit" class="btn btn-link">@res.Bar.Name</button>
+                        </form>
+                    </td>
+                    <td>@res.Text</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>You have not written any reviews yet.</p>
+}
