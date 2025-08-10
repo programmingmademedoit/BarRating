@@ -36,7 +36,7 @@ namespace BarRating.Service.Bar
             this.savedBarService = savedBarService;
         }
 
-        public async Task<Data.Entities.Bar> Create(CreateBarViewModel model, Data.Entities.User createdBy)
+        public async Task<Data.Entities.Bar> Create(CreateBarViewModel model, int userId)
         {
             var result = await photoService.AddPhotoAsync(model.Image);
 
@@ -61,8 +61,8 @@ namespace BarRating.Service.Bar
                 IsWheelchairAccessible = model.IsWheelchairAccessible,
                 IsVerified = model.IsVerified,
                 Image = result.Url.ToString(),
-                CreatedBy = createdBy,
-                CreatedById = createdBy.Id,
+                CreatedBy = userRepository.GetUserById(userId),
+                CreatedById = userId,
                 CreatedOn = model.CreatedOn
 
             };
@@ -192,7 +192,6 @@ namespace BarRating.Service.Bar
                 IsVerified = bar.IsVerified,
                 OwnerId = bar.OwnerId,
                 Image = bar.Image,
-                SavedBars = savedBarService.GetSavedBarViewModel(barId),
                 IsSaved = savedBarService.IsSaved(bar.Id, userId),
                 Reviews = reviewService.GetSpecifyPage(bar.Reviews, userId),
                 AverageRating = bar.Reviews.Any() ? bar.Reviews.Average(r => r.Rating) : 0
@@ -202,6 +201,7 @@ namespace BarRating.Service.Bar
         public BarsViewModel Index()
         {
             List<Data.Entities.Bar> bars = repository.GetAllBars(); 
+            
             List<IndexViewModel> index = bars.Select(bar => new IndexViewModel
             {
                 BarId = bar.Id,
@@ -212,7 +212,7 @@ namespace BarRating.Service.Bar
                 IsVerified = bar.IsVerified,
                 AverageRating = bar.Reviews.Any() ? bar.Reviews.Average(r => r.Rating) : 0,
                 ReviewsCount = bar.Reviews.Count,
-               // IsSaved = savedBarService.IsSaved(bar.Id, userId),
+                //IsSaved = savedBarService.IsSaved(bar.Id, userId),
             }).ToList();
 
             BarsViewModel model = new BarsViewModel

@@ -1,4 +1,4 @@
-﻿namespace BarRating.Models
+﻿namespace BarRating.Models.Admin
 {
     public class DashboardViewModel
     {

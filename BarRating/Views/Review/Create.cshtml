@@ -1,6 +1,6 @@
-﻿
-@using BarRating.Data.Enums
+﻿@using BarRating.Data.Enums
 @model BarRating.Models.Review.CreateReviewViewModel
+
 @{
     ViewData["Title"] = "Write a Review";
 }
@@ -41,13 +41,15 @@
                                 <option value="">Select price...</option>
                             </select>
                         </div>
-
+>
                         <div class="mb-3">
                             <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#peopleSection">
                                 How many people were there? (optional)
                             </button>
                             <div class="collapse mt-2" id="peopleSection">
-                                <input asp-for="NumberOfPeople" type="number" class="form-control" min="1" max="50" placeholder="1–50 people" />
+                                <select asp-for="NumberOfPeople" asp-items="Html.GetEnumSelectList<NumberOfPeople>()" class="form-control">
+                                    <option value="">Select group size...</option>
+                                </select>
                                 <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
                             </div>
                         </div>

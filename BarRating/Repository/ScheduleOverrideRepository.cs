@@ -13,7 +13,7 @@ namespace BarRating.Repository
             return context.ScheduleOverrides
                 .Include(s => s.Bar)
                 .Where(s => s.BarId == barId)
-                .Include(s => s.DayOfWeek)
+                .Include(s => s.Date)
                 .ToList();
         }
     }

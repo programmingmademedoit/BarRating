@@ -2,6 +2,7 @@
 using BarRating.Models.Reply;
 using BarRating.Repository;
 using BarRating.Service.Bar;
+using BarRating.Service.Notification;
 using BarRating.Service.Review;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,12 +18,14 @@ namespace BarRating.Controllers
         private readonly ReviewRepository reviewRepository;
         private readonly IBarService barService;
         private readonly IReviewService reviewService;
+        private readonly INotificationService notificationService;
         public ReplyController(BarRepository barRepository,
             UserRepository userRepository,
             UserManager<User> userManager,
             ReviewRepository reviewRepository,
             IBarService barService,
-            IReviewService reviewService)
+            IReviewService reviewService,
+            INotificationService notificationService)
         {
             this.barRepository = barRepository;
             this.userRepository = userRepository;
@@ -30,6 +33,7 @@ namespace BarRating.Controllers
             this.reviewRepository = reviewRepository;
             this.barService = barService;
             this.reviewService = reviewService;
+            this.notificationService = notificationService;
         }
         [HttpGet]
         public async Task<IActionResult> OwnerReply(int reviewId)
@@ -89,7 +93,16 @@ namespace BarRating.Controllers
                 review.OwnerReplyEditedAt = DateTime.UtcNow;
             }
             await reviewRepository.Edit(review);
-            return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
+
+            if(review.OwnerReplyEditedAt == null)
+            {
+                await notificationService.Create($"The owner of bar {bar.Name} has replied to your review.", review.CreatedById);
+            }
+            else
+            {
+                await notificationService.Create($"The owner of {bar.Name} has edited his reply on your review.", review.CreatedById);
+            }
+                return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
         }
         [HttpGet]
         public async Task<IActionResult> DeleteReply(int reviewId)
@@ -145,6 +158,7 @@ namespace BarRating.Controllers
             review.OwnerReplyEditedAt = null;
 
             await reviewRepository.Edit(review);
+            await notificationService.Create($"The owner of {bar.Name} has deleted his reply on your review.", review.CreatedById);
 
             TempData["SuccessMessage"] = "Your reply was deleted successfully.";
 

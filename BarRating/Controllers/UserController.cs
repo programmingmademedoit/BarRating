@@ -1,7 +1,12 @@
 ﻿using BarRating.Data;
 using BarRating.Data.Entities;
+using BarRating.Models;
+using BarRating.Models.Account;
+using BarRating.Models.Admin;
+using BarRating.Models.Review;
 using BarRating.Models.User;
 using BarRating.Repository;
+using BarRating.Service.Review;
 using BarRating.Service.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -183,5 +188,91 @@ namespace BarRating.Controllers
             return View("Error"); // You might wa
         }
 
+        /*[HttpGet]
+        public async Task<IActionResult> EditFirstandLastName()
+        {
+            User loggedIn = await userManager.GetUserAsync(User);
+            AccountEditViewModel model = await userService.EditFirstAndLastName(loggedIn.Id);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditFirstandLastName(AccountEditViewModel model)
+        {
+            Data.Entities.User user = userRepository.GetUserById(model.UserId);
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            var result = await userManager.UpdateAsync(user);
+            return RedirectToAction("Account", "EditProfile", new { userId = model.UserId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUserName()
+        {
+            User loggedIn = await userManager.GetUserAsync(User);
+            AccountEditViewModel model = await userService.EditFirstAndLastName(loggedIn.Id);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUserName(AccountEditViewModel model)
+        {
+            Data.Entities.User user = userRepository.GetUserById(model.UserId);
+            user.UserName = model.UserName;
+            var userWithUsername = await userManager.FindByNameAsync(model.UserName);
+            if (userWithUsername != null)
+            {
+                TempData["Error"] = "This Username is already in use";
+                return View(model);
+            }
+            var result = await userManager.UpdateAsync(user);
+            return RedirectToAction("Account", "EditProfile", new { userId = model.UserId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditEmail()
+        {
+            User loggedIn = await userManager.GetUserAsync(User);
+            AccountEditViewModel model = await userService.EditFirstAndLastName(loggedIn.Id);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditEmail(AccountEditViewModel model)
+        {
+            Data.Entities.User user = userRepository.GetUserById(model.UserId);
+            user.Email = model.Email;
+            var userWithEmail = await userManager.FindByEmailAsync(model.Email);
+            if (userWithEmail != null)
+            {
+                TempData["Error"] = "This Email is already in use";
+                return View(model);
+            }
+            var result = await userManager.UpdateAsync(user);
+            return RedirectToAction("Account", "EditProfile", new { userId = model.UserId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditPassword()
+        {
+            User loggedIn = await userManager.GetUserAsync(User);
+            AccountEditViewModel model = await userService.EditFirstAndLastName(loggedIn.Id);
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditPassword(AccountEditViewModel model, string newPassword)
+        {
+            Data.Entities.User user = await userManager.GetUserAsync(User);
+            var userWithPassword = await userManager.ChangePasswordAsync(user, model.Password, newPassword);
+            if (model.Password == newPassword)
+            {
+                TempData["Error"] = "New password cannot be the same as the old password";
+                return View(model);
+            }
+            var result = await userManager.UpdateAsync(user);
+            return RedirectToAction("Account", "EditProfile", new { userId = model.UserId });
+        }*/
+        
     }
 }

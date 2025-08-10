@@ -17,10 +17,11 @@ namespace BarRating.Repository
          
             return review;
         }
-        public List<Data.Entities.Review> GetAllUserReviews(int Id)
+        public List<Data.Entities.Review> GetUserReviews(int Id)
         {
             return context.Reviews
                           .Include(r => r.Bar)
+                          .Include(r => r.HelpfulVotes)
                           .Where(r => r.CreatedById == Id)
                           .ToList();
         }

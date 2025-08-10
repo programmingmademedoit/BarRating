@@ -1,13 +1,16 @@
 using BarRating.Data;
 using BarRating.Data.Entities;
+using BarRating.Data.Helpers;
 using BarRating.Repository;
 using BarRating.Service;
 using BarRating.Service.Bar;
 using BarRating.Service.HelpfulVote;
+using BarRating.Service.Notification;
 using BarRating.Service.Photo;
 using BarRating.Service.Review;
 using BarRating.Service.SavedBar;
 using BarRating.Service.Schedule;
+using BarRating.Service.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,14 +39,19 @@ builder.Services.AddScoped<ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<UserRepository>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<NotificationRepository>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<Role>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -59,7 +67,10 @@ else
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.UseRouting();
 

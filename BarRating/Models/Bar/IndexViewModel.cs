@@ -15,7 +15,6 @@ namespace BarRating.Models.Bar
         public double AverageRating { get; set; }
         public int ReviewsCount { get; set; }
         public bool IsVerified { get; set; }
-        public ICollection<SavedBarViewModel> SavedBars { get; set; }
         public bool IsSaved { get; set; }
     }
 }

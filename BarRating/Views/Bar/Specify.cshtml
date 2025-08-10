@@ -10,14 +10,16 @@
     var IsModerator = User.IsInRole("Moderator");
 }
 
+@Html.AntiForgeryToken()
+
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-8 offset-md-2">
 
-            <!-- Bar Header -->
             <div class="text-center mb-4">
                 <img src="@Model.Image" class="img-fluid rounded" style="height: 300px; object-fit: cover; width: 100%;" alt="@Model.Name" />
                 <h1>@Model.Name</h1>
+
                 @if (User.Identity.IsAuthenticated)
                 {
                     <button type="button"
@@ -26,7 +28,7 @@
                         @(Model.IsSaved ? "❤️ Saved" : "♡ Save Bar")
                     </button>
                 }
-                <!-- Average Rating -->
+
                 <div class="mb-2">
                     @for (int i = 1; i <= 5; i++)
                     {
@@ -35,7 +37,6 @@
                     <span class="ms-2">@Model.AverageRating.ToString("0.0") (@Model.Reviews?.Count)</span>
                 </div>
 
-                <!-- Price & Verified -->
                 <div>
                     @if (Model.PriceCategory != BarRating.Data.Enums.PriceCategory.None)
                     {
@@ -48,7 +49,6 @@
                 </div>
             </div>
 
-            <!-- Back & Admin Actions -->
             <div class="mb-4 text-center">
                 <a asp-controller="Bar" asp-action="Index" class="btn btn-outline-secondary btn-sm">&larr; Back to All Bars</a>
                 @if (IsAdmin)
@@ -58,7 +58,6 @@
                 }
             </div>
 
-            <!-- Tabs -->
             <ul class="nav nav-tabs mb-4">
                 <li class="nav-item">
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info">Info</button>
@@ -73,7 +72,6 @@
 
             <div class="tab-content">
 
-                <!-- Info Tab -->
                 <div class="tab-pane active show" id="info">
                     <div class="card mb-3">
                         <div class="card-body">
@@ -120,7 +118,6 @@
                     </div>
                 </div>
 
-                <!-- Schedule Tab -->
                 <div class="tab-pane" id="schedule">
                     <div class="card">
                         <div class="card-body">
@@ -144,11 +141,10 @@
                                                     {
                                                         <span class="text-danger">Closed</span>
                                                     }
-                                                    else if (schedule != null && schedule.Opening != null && schedule.Closing != null)
+                                                    else if (schedule != null && schedule.Opening.HasValue && schedule.Closing.HasValue)
                                                     {
                                                         <text>
-                                                            @schedule.Opening.ToString("hh\\:mm tt") -
-                                                            @schedule.Closing.ToString("hh\\:mm tt")
+                                                            @(schedule.Opening.Value.ToString(@"hh\:mm") + " - " + schedule.Closing.Value.ToString(@"hh\:mm"))
                                                         </text>
                                                     }
                                                     else
@@ -178,18 +174,17 @@
                                             @foreach (var o in Model.ScheduleOverrides)
                                             {
                                                 <tr>
-                                                    <td>@o.DayOfWeek.ToString()</td>
+                                                    <td>@o.Date.ToShortDateString()</td>
                                                     <td>@o.Reason</td>
                                                     <td>
                                                         @if (o.IsClosed)
                                                         {
                                                             <span class="text-danger">Closed</span>
                                                         }
-                                                        else if (o.Opening != null && o.Closing != null)
+                                                        else if (o.Opening.HasValue && o.Closing.HasValue)
                                                         {
                                                             <text>
-                                                                @o.Opening.ToString("hh\\:mm tt") -
-                                                                @o.Closing.ToString("hh\\:mm tt")
+                                                                @(o.Opening.Value.ToString(@"hh\:mm") + " - " + o.Closing.Value.ToString(@"hh\:mm"))
                                                             </text>
                                                         }
                                                         else
@@ -207,7 +202,6 @@
                     </div>
                 </div>
 
-                <!-- Reviews Tab -->
                 <div class="tab-pane" id="reviews">
                     <div class="card">
                         <div class="card-body">
@@ -230,7 +224,7 @@
                                             <h6 class="mb-1">@review.UserName (@review.UserRank)</h6>
                                             <div class="text-end">
                                                 <small class="text-muted">Created on: @review.CreatedOn.ToShortDateString()</small>
-                                                @if (review.EditedAt != null)
+                                                @if (review.EditedAt.HasValue)
                                                 {
                                                     <br />
                                                     <small class="text-muted">Edited on: @review.EditedAt?.ToShortDateString()</small>
@@ -238,7 +232,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- Rating -->
                                         <div class="mb-2">
                                             @for (int i = 1; i <= 5; i++)
                                             {
@@ -246,7 +239,6 @@
                                             }
                                         </div>
 
-                                        <!-- Number of People -->
                                         @if (review.NumberOfPeople > 0)
                                         {
                                             <div class="mb-2">
@@ -254,7 +246,6 @@
                                             </div>
                                         }
 
-                                        <!-- Tags -->
                                         @if (review.Tags != null && review.Tags.Any(t => t != BarRating.Data.Enums.Tags.None))
                                         {
                                             <div class="mb-2">
@@ -265,40 +256,35 @@
                                             </div>
                                         }
 
-                                        <!-- Review Text -->
                                         <p class="card-text">@review.Text</p>
 
-                                        <!-- Price Spent -->
                                         @if (review.Price.HasValue)
                                         {
                                             <small class="text-muted mb-2">Spent: @review.Price.Value</small>
                                         }
 
-                                        <!-- Helpful Vote Button -->
                                         @if (User.Identity.IsAuthenticated)
                                         {
                                             <button type="button"
                                                     class="btn @(review.IsHelpfulByCurrentUser ? "btn-success" : "btn-outline-success") btn-sm mt-2"
                                                     onclick="toggleHelpful(@review.ReviewId, this)">
-                                                @(review.IsHelpfulByCurrentUser ? "👍 Helpful" : "🤍 Helpful") ((@review.HelpfulCount)
+                                                @(review.IsHelpfulByCurrentUser ? "👍 Helpful" : "🤍 Helpful") (@review.HelpfulCount)
                                             </button>
                                         }
 
-                                        <!-- Owner Reply -->
                                         @if (!string.IsNullOrEmpty(review.OwnerReply))
                                         {
                                             <div class="mt-3 p-3 bg-light rounded">
                                                 <strong>Owner Reply</strong>
                                                 <p class="mb-1">@review.OwnerReply</p>
                                                 <small class="text-muted">Replied on @review.OwnerRepliedAt?.ToShortDateString()</small>
-                                                @if (review.OwnerReplyEditedAt != null)
+                                                @if (review.OwnerReplyEditedAt.HasValue)
                                                 {
                                                     <small class="text-muted d-block">Edited on @review.OwnerReplyEditedAt?.ToShortDateString()</small>
                                                 }
                                             </div>
                                         }
 
-                                        <!-- User Actions -->
                                         @if (User.Identity.IsAuthenticated)
                                         {
                                             var user = await userManager.GetUserAsync(User);
@@ -306,7 +292,6 @@
                                             var isStaff = IsAdmin || IsModerator;
                                             var isOwner = Model.OwnerId == user.Id;
 
-                                            <!-- Edit/Delete Review -->
                                             @if (isAuthor || isStaff)
                                             {
                                                 <div class="mt-2">
@@ -315,17 +300,16 @@
                                                 </div>
                                             }
 
-                                            <!-- Owner Reply -->
                                             @if (isOwner)
                                             {
                                                 if (string.IsNullOrEmpty(review.OwnerReply))
                                                 {
-                                                    <a asp-controller="Review" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-outline-primary btn-sm mt-2">Reply as Owner</a>
+                                                    <a asp-controller="Reply" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-outline-primary btn-sm mt-2">Reply as Owner</a>
                                                 }
                                                 else
                                                 {
-                                                    <a asp-controller="Review" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-warning btn-sm mt-2 me-1">Edit Reply</a>
-                                                    <a asp-controller="Review" asp-action="DeleteReply" asp-route-reviewId="@review.ReviewId" class="btn btn-danger btn-sm mt-2">Delete Reply</a>
+                                                    <a asp-controller="Reply" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-warning btn-sm mt-2 me-1">Edit Reply</a>
+                                                    <a asp-controller="Reply" asp-action="DeleteReply" asp-route-reviewId="@review.ReviewId" class="btn btn-danger btn-sm mt-2">Delete Reply</a>
                                                 }
                                             }
                                         }
@@ -344,6 +328,7 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
     <script>
         async function toggleSaveBar(barId, button) {
@@ -368,13 +353,14 @@
                     button.classList.remove('btn-danger');
                     button.classList.add('btn-outline-danger');
                 }
+                showToast(result.message);
             } else {
                 alert(result.message);
             }
         }
 
         async function toggleHelpful(reviewId, button) {
-            const response = await fetch('@Url.Action("HelpfulVote", "Review")', {
+            const response = await fetch('@Url.Action("HelpfulVote", "HelpfulVote")', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -386,12 +372,10 @@
             const result = await response.json();
 
             if (result.success) {
-                const newCount = result.count;
-                const isSaved = result.isSaved;
-
-                button.textContent = `${isSaved ? '👍' : '🤍'} Helpful (${newCount})`;
-                button.classList.toggle('btn-outline-success', !isSaved);
-                button.classList.toggle('btn-success', isSaved);
+                // ✅ Use the count from the server — don't guess
+                button.textContent = `${result.isSaved ? '👍' : '🤍'} Helpful (${result.count})`;
+                button.classList.toggle('btn-outline-success', !result.isSaved);
+                button.classList.toggle('btn-success', result.isSaved);
             } else {
                 alert(result.message);
             }

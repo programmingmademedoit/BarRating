@@ -1,4 +1,4 @@
-﻿@using BarRating.Models.Bar
+﻿
 @using Microsoft.AspNetCore.Identity
 @model BarRating.Models.Bar.BarsViewModel
 
@@ -6,10 +6,11 @@
     ViewData["Title"] = "Bars";
 }
 
+@Html.AntiForgeryToken()
+
 <div class="container mt-5">
     <h2 class="text-center mb-4">Discover Bars</h2>
 
-    <!-- Search Bar -->
     <form asp-controller="Bar" asp-action="Search" method="get" class="mb-4 d-flex justify-content-center">
         <input type="text"
                name="searchQuery"
@@ -19,7 +20,6 @@
         <button type="submit" class="btn btn-primary ms-2">Search</button>
     </form>
 
-    <!-- Admin Create Button -->
     @if (User.IsInRole("Admin"))
     {
         <div class="text-end mb-3">
@@ -27,7 +27,6 @@
         </div>
     }
 
-    <!-- Bars Grid -->
     <div class="row g-4">
         @if (Model.Bars != null && Model.Bars.Count > 0)
         {
@@ -45,19 +44,16 @@
                             <h5 class="card-title">@bar.Name</h5>
                             <p class="card-text text-muted">@bar.Description</p>
 
-                            <!-- Bar Type -->
                             @if (bar.BarType != BarRating.Data.Enums.BarType.None)
                             {
                                 <p class="text-muted"><small>@Html.DisplayFor(modelItem => bar.BarType)</small></p>
                             }
 
-                            <!-- Price Category -->
                             @if (bar.PriceCategory != BarRating.Data.Enums.PriceCategory.None)
                             {
                                 <span class="badge bg-primary mb-2">@bar.PriceCategory</span>
                             }
 
-                            <!-- Rating -->
                             <p class="mb-1">
                                 <strong>Rating:</strong> (@bar.AverageRating.ToString("0.0"))
                             </p>
@@ -83,7 +79,6 @@
                                 <small class="text-muted ms-1">(@bar.ReviewsCount) Reviews</small>
                             </div>
 
-                            <!-- Verified Badge -->
                             @if (bar.IsVerified)
                             {
                                 <span class="badge bg-success">
@@ -136,7 +131,8 @@
 @section Scripts {
     <script>
         async function toggleSave(barId, button) {
-            const response = await fetch('@Url.Action("Create", "SavedBar")', {
+            console.log("barId from view:", barId);
+            const response = await fetch('@Url.Action("SavedBar", "SavedBar")', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -157,6 +153,7 @@
                     button.classList.remove('btn-danger');
                     button.classList.add('btn-outline-danger');
                 }
+
                 showToast(result.message);
             } else {
                 alert(result.message);
@@ -164,19 +161,18 @@
         }
 
         function showToast(message) {
-            const toastEl = document.createElement('div');
-            toastEl.className = 'toast align-items-center text-white bg-success border-0';
-            toastEl.style = 'position: fixed; top: 20px; right: 20px; z-index: 1055;';
-            toastEl.innerHTML = `
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-success text-white border-0';
+            toast.style = 'position: fixed; top: 20px; right: 20px; z-index: 1055;';
+            toast.innerHTML = `
                         <div class="d-flex">
                             <div class="toast-body">${message}</div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                        </div>
-                    `;
-            document.body.appendChild(toastEl);
-            const toast = new bootstrap.Toast(toastEl, { autohide: true });
-            toast.show();
-            setTimeout(() => toastEl.remove(), 3000);
+                        </div>`;
+            document.body.appendChild(toast);
+            const bootstrapToast = new bootstrap.Toast(toast, { autohide: true });
+            bootstrapToast.show();
+            setTimeout(() => toast.remove(), 3000);
         }
     </script>
 }

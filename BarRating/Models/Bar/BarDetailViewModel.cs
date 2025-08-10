@@ -49,7 +49,6 @@ namespace BarRating.Models.Bar
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; } 
         public List<ReviewViewModel> Reviews { get; set; } = new List<ReviewViewModel>();
-        public ICollection<SavedBarViewModel> SavedBars { get; set; } = new List<SavedBarViewModel>();
         public bool IsSaved { get; set; } = false;
     }
 }

@@ -1,7 +1,7 @@
 using BarRating.Data;
 using BarRating.Data.Entities;
 using BarRating.Models;
-using BarRating.Models.User;
+using BarRating.Models.Admin;
 using BarRating.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

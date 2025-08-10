@@ -18,9 +18,9 @@ namespace BarRating.Repository
         public HelpfulVote GetVoteByReviewIdandUserId(int reviewId, int userId)
         {
             return context.HelpfulVotes
-                .Include(h => h.CreatedBy)
-                .Include(h => h.Review)
-                .Single(h => h.ReviewId == reviewId && h.CreatedById == userId);
+        .Include(h => h.CreatedBy)
+        .Include(h => h.Review)
+        .SingleOrDefault(h => h.ReviewId == reviewId && h.CreatedById == userId);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using BarRating.Data.Entities;
 
-namespace BarRating.Models.User
+namespace BarRating.Models.Admin
 {
     public class EditUserRoleViewModel
     {

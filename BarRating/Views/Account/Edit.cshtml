@@ -1,0 +1,307 @@
+﻿@model BarRating.Models.Account.AccountEditViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container mt-5">
+    <h2>Edit Profile</h2>
+    <table class="table">
+        <tr>
+            <td><strong>Full Name</strong></td>
+            <td id="name-display">@Model.FirstName @Model.LastName</td>
+            <td>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="editName('@Model.FirstName', '@Model.LastName')">
+                    Edit
+                </button>
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Username</strong></td>
+            <td id="username-display">@Model.UserName</td>
+            <td>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="editUsername('@Model.UserName')">
+                    Edit
+                </button>
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Email</strong></td>
+            <td id="email-display">@Model.Email</td>
+            <td>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="editField('email', '@Model.Email')">
+                    Edit
+                </button>
+            </td>
+        </tr>
+
+        <tr>
+            <td><strong>Password</strong></td>
+            <td>••••••••</td>
+            <td>
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="editPassword()">
+                    Change
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="modal fade" id="nameModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <input type="text" id="firstNameInput" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" id="lastNameInput" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveName()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="usernameModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Username</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Username</label>
+                <input type="text" id="usernameInput" class="form-control" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveUsername()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Edit Email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="email" id="editInput" class="form-control" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveField()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Current Password</label>
+                    <input type="password" id="currentPassword" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">New Password</label>
+                    <input type="password" id="newPassword" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Confirm New Password</label>
+                    <input type="password" id="confirmPassword" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="savePassword()">Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentField = null;
+
+        function editName(firstName, lastName) {
+            document.getElementById('firstNameInput').value = firstName;
+            document.getElementById('lastNameInput').value = lastName;
+            new bootstrap.Modal(document.getElementById('nameModal')).show();
+        }
+
+                async function saveName() {
+            const firstName = document.getElementById('firstNameInput').value.trim();
+            const lastName = document.getElementById('lastNameInput').value.trim();
+
+            if (!firstName) {
+                alert('First name is required.');
+                return;
+            }
+
+            const response = await fetch('@Url.Action("UpdateName", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    valueOne: firstName,
+                    valueTwo: lastName
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('name-display').textContent = `${result.firstName} ${result.lastName}`;
+                bootstrap.Modal.getInstance(document.getElementById('nameModal')).hide();
+                showToast('Name updated successfully.');
+            } else {
+                alert(result.message || 'Update failed.');
+            }
+        }
+
+                function editUsername(username) {
+            document.getElementById('usernameInput').value = username;
+            new bootstrap.Modal(document.getElementById('usernameModal')).show();
+        }
+
+        async function saveUsername() {
+            const value = document.getElementById('usernameInput').value.trim();
+            if (!value) {
+                alert('Username is required.');
+                return;
+            }
+
+            const response = await fetch('@Url.Action("UpdateUserName", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ value: value })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('username-display').textContent = result.value;
+                bootstrap.Modal.getInstance(document.getElementById('usernameModal')).hide();
+                showToast('Username updated successfully.');
+            } else {
+                alert(result.message || 'Update failed.');
+            }
+        }
+
+        function editField(field, currentValue) {
+            currentField = field;
+            document.getElementById('modalTitle').textContent = 'Edit ' + field.charAt(0).toUpperCase() + field.slice(1);
+            document.getElementById('editInput').value = currentValue;
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
+
+               async function saveField() {
+            const value = document.getElementById('editInput').value.trim();
+            if (!value) {
+                alert('Value cannot be empty.');
+                return;
+            }
+
+            const response = await fetch('@Url.Action("UpdateEmail", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ value }) // 
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('email-display').textContent = result.value;
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                showToast('Email updated successfully.');
+            } else {
+                alert(result.message || 'Update failed.');
+            }
+        }
+
+        function editPassword() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            new bootstrap.Modal(document.getElementById('passwordModal')).show();
+        }
+
+                async function savePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                alert('All fields are required.');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('New passwords do not match.');
+                return;
+            }
+
+            const response = await fetch('@Url.Action("UpdatePassword", "Account")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    valueOne: current,     
+                    valueTwo: newPass 
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+                showToast('Password changed successfully.');
+            } else {
+                alert(result.message);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-success text-white border-0';
+            toast.style = 'position: fixed; top: 20px; right: 20px; z-index: 1055;';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>`;
+            document.body.appendChild(toast);
+            new bootstrap.Toast(toast, { autohide: true }).show();
+            setTimeout(() => toast.remove(), 3000);
+        }
+                
+    </script>
+}

@@ -1,5 +1,4 @@
-﻿
-@model BarRating.Models.Bar.CreateBarViewModel
+﻿@model BarRating.Models.Bar.CreateBarViewModel
 
 @{
     ViewData["Title"] = "Create New Bar";
@@ -8,10 +7,11 @@
 <div class="container mt-5">
     <h2>Create New Bar</h2>
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+
         <div class="row">
             <div class="col-md-8">
 
-                <!-- Basic Info -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5>Basic Information</h5>
@@ -37,7 +37,6 @@
                     </div>
                 </div>
 
-                <!-- Location & Contact -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5>Location & Contact</h5>
@@ -80,7 +79,6 @@
                     </div>
                 </div>
 
-                <!-- Bar Type -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5>Bar Type</h5>
@@ -96,10 +94,9 @@
                     </div>
                 </div>
 
-                <!-- Schedule -->
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5>Regular Schedule (Set Hours for Each Day)</h5>
+                        <h5>Regular Schedule</h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -135,7 +132,7 @@
                             document.querySelectorAll('input[type="checkbox"][class="form-check-input"]').forEach(checkbox => {
                                 const day = checkbox.id.split('-')[1];
                                 const hoursDiv = document.getElementById(`hours-${day}`);
-
+                                hoursDiv.style.display = checkbox.checked ? 'none' : 'flex';
                                 checkbox.addEventListener('change', () => {
                                     hoursDiv.style.display = checkbox.checked ? 'none' : 'flex';
                                 });
@@ -144,7 +141,6 @@
                     </div>
                 </div>
 
-                <!-- Holiday Overrides -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5>Holiday or Special Event Hours</h5>
@@ -220,7 +216,6 @@
                     </div>
                 </div>
 
-                <!-- Features -->
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5>Features</h5>
@@ -263,22 +258,6 @@
                     </div>
                 </div>
 
-                <!-- Owner (Admin Only) -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>Ownership (Optional)</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label asp-for="OwnerId" class="form-label"></label>
-                            <select asp-for="OwnerId" asp-items="ViewBag.OwnerList" class="form-control">
-                                <option value="">No owner</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit -->
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-success btn-lg">Create Bar</button>
                     <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>

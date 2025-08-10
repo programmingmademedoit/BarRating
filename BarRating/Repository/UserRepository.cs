@@ -1,10 +1,11 @@
 ﻿using BarRating.Data;
 using BarRating.Data.Entities;
+using BarRating.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace BarRating.Repository
 {
-    public class UserRepository 
+    public class UserRepository
     {
         private readonly ApplicationDbContext _context;
 

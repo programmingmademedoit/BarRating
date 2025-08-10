@@ -1,0 +1,195 @@
+﻿@using BarRating.Models.Account
+@model AccountIndexViewModel
+
+@{
+    ViewData["Title"] = "My Account";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="container mt-5">
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="nav flex-column nav-pills">
+                <button class="nav-link active" id="about-tab" data-bs-toggle="pill" data-bs-target="#about" type="button" role="tab">
+                    About Me
+                </button>
+                <button class="nav-link" id="saved-tab" data-bs-toggle="pill" data-bs-target="#saved" type="button" role="tab">
+                    Saved Bars
+                </button>
+                <button class="nav-link" id="reviews-tab" data-bs-toggle="pill" data-bs-target="#reviews" type="button" role="tab">
+                    Reviews
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="tab-content">
+
+                <div class="tab-pane fade show active" id="about" role="tabpanel">
+                    <div class="text-center mb-4">
+                        <img src="https://via.placeholder.com/120" alt="Profile" class="rounded-circle mb-3" style="width: 120px; height: 120px;" />
+                        <h3>@Model.UserName</h3>
+                        <p class="text-muted"><strong>Rank:</strong> @Model.Rank</p>
+                        <p class="text-muted">
+                            <strong>Member since:</strong>
+                            @if (Model.RegistrationDate.HasValue)
+                            {
+                                if (DateTime.Now.Year - Model.RegistrationDate.Value.Year >= 1)
+                                {
+                                    @Model.RegistrationDate.Value.Year
+                                }
+                                else
+                                {
+                                    @Model.RegistrationDate.Value.ToString("MMMM")
+                                }
+                            }
+                            else
+                            {
+                                <text>Unknown</text>
+                            }
+                        </p>
+                        @if (Model.IsVerified)
+                        {
+                            <span class="badge bg-success">Verified</span>
+                        }
+                        <a asp-controller="Account" asp-action="Edit" class="btn btn-primary">Edit Profile</a>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="saved" role="tabpanel">
+                    <div id="saved-content">
+                        <div class="text-center text-muted">
+                            <p>Loading saved bars...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="reviews" role="tabpanel">
+                    <div id="reviews-content">
+                        <div class="text-center text-muted">
+                            <p>Loading reviews...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTab = document.getElementById('saved-tab');
+            const reviewsTab = document.getElementById('reviews-tab');
+
+            savedTab.addEventListener('shown.bs.tab', async function () {
+                const container = document.getElementById('saved-content');
+                if (container.children.length > 0 && !container.querySelector('.text-muted')) return;
+
+                try {
+            const response = await fetch('@Url.Action("UserSavedBars", "SavedBar")');
+            const html = await response.text();
+            container.innerHTML = html;
+        } catch (err) {
+            container.innerHTML = '<p class="text-danger">Failed to load saved bars.</p>';
+        }
+            });
+
+            reviewsTab.addEventListener('shown.bs.tab', async function () {
+                const container = document.getElementById('reviews-content');
+                if (container.children.length > 0 && !container.querySelector('.text-muted')) return;
+
+                try {
+                    const response = await fetch('@Url.Action("UserReviews", "Review")');
+                    const html = await response.text();
+            container.innerHTML = html;
+        } catch (err) {
+            container.innerHTML = '<p class="text-danger">Failed to load reviews.</p>';
+        }
+            });
+        });
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-success text-white border-0';
+            toast.style = 'position: fixed; top: 20px; right: 20px; z-index: 1055;';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>`;
+            document.body.appendChild(toast);
+            new bootstrap.Toast(toast, { autohide: true }).show();
+            setTimeout(() => toast.remove(), 3000);
+        }
+         async function toggleSave(barId, button) {
+            console.log('toggleSaveBar called', barId);
+
+            try {
+                const response = await fetch('@Url.Action("SavedBar", "SavedBar")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ barId: barId })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (result.isSaved) {
+                        button.textContent = '❤️';
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                    } else {
+                        button.textContent = '♡';
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                    }
+                    showToast(result.message);
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error in toggleSaveBar:', error);
+                alert('Network error. Check console.');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-success text-white border-0';
+            toast.style = 'position: fixed; top: 20px; right: 20px; z-index: 1055;';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>`;
+            document.body.appendChild(toast);
+            new bootstrap.Toast(toast, { autohide: true }).show();
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const savedTab = document.getElementById('saved-tab');
+
+            savedTab.addEventListener('shown.bs.tab', async function () {
+                const container = document.getElementById('saved-content');
+                if (container.children.length > 0 && !container.querySelector('.text-muted')) return;
+
+                try {
+                    const response = await fetch('@Url.Action("UserSavedBars", "SavedBar")');
+                    const html = await response.text();
+                    container.innerHTML = html;
+                } catch (err) {
+                    container.innerHTML = '<p class="text-danger">Failed to load saved bars.</p>';
+                }
+            });
+        });
+    </script>
+}

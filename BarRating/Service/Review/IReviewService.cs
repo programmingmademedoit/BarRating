@@ -11,5 +11,6 @@ namespace BarRating.Service.Review
         public Task<EditReviewViewModel> GetEdit(int reviewId);
         public Task<Data.Entities.Review> PostEdit(EditReviewViewModel model);
         public Task<Data.Entities.Review> Delete(Data.Entities.Review review);
+        public Task<List<ReviewViewModel>> GetUserReviews(int userId);
     }
 }

@@ -10,7 +10,7 @@ namespace BarRating.Data.Entities
         public string Text { get; set; }
         public int Rating { get; set; }
 
-        public List<HelpfulVote> HelpfulVotes { get; set; }
+        public List<HelpfulVote>? HelpfulVotes { get; set; }
         public DateTime? EditedAt { get; set; }
         public PriceCategory? Price { get; set; }
         public NumberOfPeople? NumberOfPeople { get; set; }

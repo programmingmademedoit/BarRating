@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BarRating.Models.User
+namespace BarRating.Models.Admin
 {
     public class CreateUserViewModel
     {

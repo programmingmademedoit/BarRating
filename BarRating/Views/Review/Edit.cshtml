@@ -17,7 +17,6 @@
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="BarId" />
 
-                        <!-- Rating -->
                         <div class="mb-3">
                             <label asp-for="Rating" class="form-label">Your Rating</label>
                             <select asp-for="Rating" class="form-control" required>
@@ -31,7 +30,6 @@
                             <span asp-validation-for="Rating" class="text-danger"></span>
                         </div>
 
-                        <!-- Review Text -->
                         <div class="mb-3">
                             <label asp-for="Text" class="form-label">Review</label>
                             <textarea asp-for="Text" class="form-control" rows="5" maxlength="1000" required></textarea>
@@ -39,7 +37,6 @@
                             <small class="form-text text-muted">Max 1000 characters.</small>
                         </div>
 
-                        <!-- Price Category -->
                         <div class="mb-3">
                             <label asp-for="Price" class="form-label">Price Category</label>
                             <select asp-for="Price"
@@ -49,15 +46,18 @@
                             </select>
                         </div>
 
-                        <!-- Number of People -->
                         <div class="mb-3">
-                            <label asp-for="NumberOfPeople" class="form-label">How many people were in your group?</label>
-                            <input asp-for="NumberOfPeople" type="number" class="form-control" min="1" max="50" />
-                            <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
-                            <small class="form-text text-muted">Optional: 1–50 people.</small>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#peopleSection">
+                                How many people were there? (optional)
+                            </button>
+                            <div class="collapse mt-2" id="peopleSection">
+                                <select asp-for="NumberOfPeople" asp-items="Html.GetEnumSelectList<NumberOfPeople>()" class="form-control">
+                                    <option value="">Select group size...</option>
+                                </select>
+                                <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
+                            </div>
                         </div>
 
-                        <!-- Tags -->
                         <div class="mb-3">
                             <label>What describes this visit?</label>
                             <div class="row g-2">
@@ -83,7 +83,6 @@
                             <small class="form-text text-muted">Select all that apply.</small>
                         </div>
 
-                        <!-- Submit -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-warning">Update Review</button>
                             <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@Model.BarId" class="btn btn-outline-secondary">

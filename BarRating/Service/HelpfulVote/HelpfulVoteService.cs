@@ -35,10 +35,17 @@ namespace BarRating.Service.HelpfulVote
             Data.Entities.HelpfulVote helpfulVote = helpfulVoteRepository.GetVoteByReviewIdandUserId(reviewId, userId);
             return await helpfulVoteRepository.Delete(helpfulVote);
         }
-        public bool HasUserVoted(int barId, int userId)
+        public bool HasUserVoted(int reviewId, int userId)
         {
-            var savedBar = helpfulVoteRepository.GetVoteByReviewIdandUserId(barId, userId);
-            return savedBar != null;
+            var savedBar = helpfulVoteRepository.GetVoteByReviewIdandUserId(reviewId, userId);
+            if(savedBar == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

@@ -10,12 +10,13 @@ namespace BarRating.Models.Review
     {
          public int ReviewId { get; set; }
         public int BarId { get; set; }
+        public string BarName { get; set; }
+        public string BarImage { get; set; }
         public int CreatedById { get; set; }
 
         public string Text { get; set; }
         public int Rating { get; set; }
 
-        public List<HelpfulVoteViewModel> HelpfulVotes { get; set; }
         public int HelpfulCount { get; set; }
         public bool IsHelpfulByCurrentUser { get; set; } = false;
         public DateTime? EditedAt { get; set; }

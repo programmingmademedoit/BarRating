@@ -46,7 +46,7 @@ namespace BarRating.Service.Schedule
             {
                 Id = s.Id,
                 BarId = s.BarId,
-                DayOfWeek = s.DayOfWeek,
+                Date = s.Date,
                 Opening = s.Opening,
                 Closing = s.Closing,
                 IsClosed = s.IsClosed,
@@ -61,7 +61,7 @@ namespace BarRating.Service.Schedule
             {
                 Id = s.Id,
                 BarId = s.BarId,
-                DayOfWeek = s.DayOfWeek,
+                Date = s.Date,
                 Opening = s.Opening,
                 Closing = s.Closing,
                 IsClosed = s.IsClosed,

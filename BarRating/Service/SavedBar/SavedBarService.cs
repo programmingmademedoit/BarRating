@@ -1,4 +1,5 @@
 ﻿using BarRating.Data.Entities;
+using BarRating.Models.Bar;
 using BarRating.Models.SavedBar;
 using BarRating.Repository;
 using Microsoft.AspNetCore.Identity;
@@ -24,22 +25,23 @@ namespace BarRating.Service.SavedBar
             this.barRepository = barRepository;
         }
 
-        public List<SavedBarViewModel> GetSavedBarsByUserId(int userId)
+        public List<IndexViewModel> GetSavedBarsByUserId(int userId)
         {
             List<Data.Entities.SavedBar> savedBars = savedBarRepository.GetUserSavedBars(userId);
-            return savedBars.Select(sb => new Models.SavedBar.SavedBarViewModel
+             return savedBars.Select(sb => new Models.Bar.IndexViewModel
             {
-                Id = sb.Id,
-                BarId = sb.BarId,
-                UserId = userId,
-                CreatedOn = sb.CreatedOn
+            BarId = sb.BarId,
+            BarType = sb.Bar.BarType,
             }).ToList();
+
         }
         public async Task<Data.Entities.SavedBar> Create(int barId, int userId)
         {
             Data.Entities.SavedBar savedBar = new Data.Entities.SavedBar
             {
                 BarId = barId,
+                Bar = barRepository.GetBarById(barId),
+                CreatedBy  = userRepository.GetUserById(userId),
                 CreatedById = userId,
                 CreatedOn = DateTime.UtcNow
             };
@@ -48,12 +50,27 @@ namespace BarRating.Service.SavedBar
         public async Task<Data.Entities.SavedBar> Delete(int barId, int userId)
         {
             Data.Entities.SavedBar savedBar = savedBarRepository.GetSavedBarByBarIdandUserId(barId, userId);
+            if(savedBar == null)
+            {
+                return null;
+            }
             return await savedBarRepository.Delete(savedBar);
         }
         public bool IsSaved(int barId, int userId)
         {
+            if(userId <= 0)
+            {
+                return false;
+            }
             var savedBar = savedBarRepository.GetSavedBarByBarIdandUserId(barId, userId);
-            return savedBar != null;
+            if(savedBar == null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
         public List<SavedBarViewModel> GetSavedBarViewModel(int barId)
         {
@@ -67,5 +84,30 @@ namespace BarRating.Service.SavedBar
             }).ToList();
 
         }
+        public async Task<BarsViewModel> GetUserSavedBars(int userId)
+        {
+            List<Data.Entities.Bar> savedBars = barRepository.GetUserSavedBars(userId);
+            List<IndexViewModel> viewModel = savedBars.Select( savedBar => new IndexViewModel
+            {
+                BarId = savedBar.Id,
+                Name = savedBar.Name,
+                Description = savedBar.Description,
+                Image = savedBar.Image,
+                PriceCategory = savedBar.PriceCategory,
+                IsVerified = savedBar.IsVerified,
+                AverageRating = savedBar.Reviews.Any() ? savedBar.Reviews.Average(r => r.Rating) : 0,
+                ReviewsCount = savedBar.Reviews.Count,
+                IsSaved = true
+            }).ToList();
+
+            BarsViewModel model = new BarsViewModel()
+            { 
+                Bars = viewModel
+            };
+
+            return model;
+
+        }
+
     }
 }

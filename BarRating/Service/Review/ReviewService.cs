@@ -1,4 +1,5 @@
 ﻿
+using BarRating.Data.Entities;
 using BarRating.Data.Enums;
 using BarRating.Models.Review;
 using BarRating.Repository;
@@ -47,9 +48,8 @@ namespace BarRating.Service.Review
                 OwnerReply = r.OwnerReply,
                 OwnerRepliedAt = r.OwnerRepliedAt,
                 OwnerReplyEditedAt = r.OwnerReplyEditedAt,
-                HelpfulVotes = helpfulVoteService.GetHelpfulVoteViewModel(r.HelpfulVotes),
-                IsHelpfulByCurrentUser = helpfulVoteService.HasUserVoted(r.Id, userId),
-                HelpfulCount = r.HelpfulVotes.Count,
+                IsHelpfulByCurrentUser = userId != 0 && r.HelpfulVotes?.Any(h => h.CreatedById == userId) == true,
+                HelpfulCount = r.HelpfulVotes?.Count() ?? 0,
                 CreatedOn = r.CreatedOn,
                 EditedAt = r.EditedAt,
                 UserName = r.CreatedBy?.UserName,
@@ -105,6 +105,32 @@ namespace BarRating.Service.Review
         public async Task<Data.Entities.Review> Delete(Data.Entities.Review review)
         {
             return await repository.Delete(review);
+        }
+        public async Task<List<ReviewViewModel>> GetUserReviews(int userId)
+        {
+            List<Data.Entities.Review> reviews = repository.GetUserReviews(userId);
+            return reviews.Select(r => new ReviewViewModel
+            {
+                BarId = r.BarId,
+                BarName = r.Bar.Name,
+                BarImage = r.Bar.Image,
+                ReviewId = r.Id,
+                CreatedById = userId,
+                Text = r.Text,
+                Rating = r.Rating,
+                Price = r.Price,
+                NumberOfPeople = r.NumberOfPeople,
+                Tags = r.Tags,
+                OwnerId = r.Bar.OwnerId,
+                OwnerReply = r.OwnerReply,
+                OwnerRepliedAt = r.OwnerRepliedAt,
+                OwnerReplyEditedAt = r.OwnerReplyEditedAt,
+                HelpfulCount = r.HelpfulVotes?.Count() ?? 0,
+                CreatedOn = r.CreatedOn,
+                EditedAt = r.EditedAt,
+                UserName = r.CreatedBy?.UserName,
+                UserRank = r.CreatedBy?.Rank ?? Rank.Newbie
+            }).ToList();
         }
     }
 }

@@ -1,38 +1,102 @@
-﻿@using BarRating.Data.Entities
-@model List<BarRating.Data.Entities.Review>
+﻿@using Microsoft.AspNetCore.Identity
+@model List<BarRating.Models.Review.ReviewViewModel>
+@inject UserManager<BarRating.Data.Entities.User> userManager
 
-@{
-    ViewData["Title"] = "My Reviews";
-}
-
-<h2>@ViewData["Title"]</h2>
+<h4>Your Reviews</h4>
 
 @if (Model != null && Model.Any())
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Bar Name</th>
-                <th>Review Text</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var res in Model)
-            {
-                <tr>
-                    <td>
-                        <form asp-controller="Bar" asp-action="Specify" method="get">
-                            <input type="hidden" name="barId" value="@res.BarId" />
-                            <button type="submit" class="btn btn-link">@res.Bar.Name</button>
-                        </form>
-                    </td>
-                    <td>@res.Text</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="list-group mb-4">
+        @foreach (var review in Model)
+        {
+            <div class="list-group-item mb-3 p-3 border rounded shadow-sm">
+                <div class="d-flex mb-3">
+                    <img src="@review.BarImage" alt="@review.BarName" class="rounded" style="width: 80px; height: 90px; object-fit: cover;" />
+                    <div class="ms-3">
+                        <h6 class="mb-1">@review.BarName</h6>
+                        <p class="mb-1 text-muted">Reviewed on @review.CreatedOn.ToShortDateString()</p>
+                        @if (review.EditedAt.HasValue)
+                        {
+                            <small class="text-muted">Edited</small>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="text-warning">@(i <= review.Rating ? "★" : "☆")</span>
+                    }
+                </div>
+
+                <p class="card-text mb-2">@review.Text</p>
+
+                @if (review.Tags?.Any(t => t != BarRating.Data.Enums.Tags.None) == true)
+                {
+                    <div class="mb-2">
+                        @foreach (var tag in review.Tags.Where(t => t != BarRating.Data.Enums.Tags.None))
+                        {
+                            <span class="badge bg-info text-white me-1">@tag.GetDisplayName()</span>
+                        }
+                    </div>
+                }
+
+                <div class="mb-2 text-muted small">
+                    @if (review.Price.HasValue)
+                    {
+                        <span class="me-3">💸 Spent: @review.Price.Value</span>
+                    }
+                    @if (review.NumberOfPeople > 0)
+                    {
+                        <span>👥 @review.NumberOfPeople people</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(review.OwnerReply))
+                {
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <strong>Owner Reply</strong>
+                        <p class="mb-1">@review.OwnerReply</p>
+                        <small class="text-muted">Replied on @review.OwnerRepliedAt?.ToShortDateString()</small>
+                        @if (review.OwnerReplyEditedAt.HasValue)
+                        {
+                            <small class="text-muted d-block">Edited on @review.OwnerReplyEditedAt?.ToShortDateString()</small>
+                        }
+                    </div>
+                }
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    var user = await userManager.GetUserAsync(User);
+                    var IsAdmin = User.IsInRole("Admin");
+                    var IsModerator = User.IsInRole("Moderator");
+                    var isAuthor = review.CreatedById == user.Id;
+                    var isStaff = IsAdmin || IsModerator;
+
+                    <div class="mt-3 d-flex gap-2">
+                        <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@review.BarId" class="btn btn-outline-primary btn-sm">View Bar</a>
+                        <a asp-controller="Review" asp-action="Edit" asp-route-id="@review.ReviewId" class="btn btn-warning btn-sm">Edit</a>
+                        <a asp-controller="Review" asp-action="Delete" asp-route-id="@review.ReviewId" class="btn btn-danger btn-sm">Delete</a>
+                    </div>
+
+                    @if (isStaff)
+                    {
+                        if (string.IsNullOrEmpty(review.OwnerReply))
+                        {
+                            <a asp-controller="Reply" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-outline-primary btn-sm mt-2">Reply as Owner</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Reply" asp-action="OwnerReply" asp-route-reviewId="@review.ReviewId" class="btn btn-warning btn-sm mt-2 me-1">Edit Reply</a>
+                            <a asp-controller="Reply" asp-action="DeleteReply" asp-route-reviewId="@review.ReviewId" class="btn btn-danger btn-sm mt-2">Delete Reply</a>
+                        }
+                    }
+                }
+            </div>
+        }
+    </div>
 }
 else
 {
-    <p>You have not written any reviews yet.</p>
+    <p class="text-muted">You haven't written any reviews yet.</p>
 }

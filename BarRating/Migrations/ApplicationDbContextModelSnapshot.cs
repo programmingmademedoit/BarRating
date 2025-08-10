@@ -120,7 +120,7 @@ namespace BarRating.Migrations
                     b.Property<int>("BarId")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("Closing")
+                    b.Property<TimeSpan?>("Closing")
                         .HasColumnType("time");
 
                     b.Property<int>("DayOfWeek")
@@ -129,7 +129,7 @@ namespace BarRating.Migrations
                     b.Property<bool>("IsClosed")
                         .HasColumnType("bit");
 
-                    b.Property<TimeSpan>("Opening")
+                    b.Property<TimeSpan?>("Opening")
                         .HasColumnType("time");
 
                     b.HasKey("Id");
@@ -163,6 +163,34 @@ namespace BarRating.Migrations
                     b.HasIndex("ReviewId");
 
                     b.ToTable("HelpfulVotes");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("BarRating.Data.Entities.Review", b =>
@@ -286,20 +314,19 @@ namespace BarRating.Migrations
                     b.Property<int>("BarId")
                         .HasColumnType("int");
 
-                    b.Property<TimeSpan>("Closing")
+                    b.Property<TimeSpan?>("Closing")
                         .HasColumnType("time");
 
-                    b.Property<int>("DayOfWeek")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsClosed")
                         .HasColumnType("bit");
 
-                    b.Property<TimeSpan>("Opening")
+                    b.Property<TimeSpan?>("Opening")
                         .HasColumnType("time");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -373,6 +400,9 @@ namespace BarRating.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
+
+                    b.Property<string>("URL")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -543,6 +573,17 @@ namespace BarRating.Migrations
                     b.Navigation("CreatedBy");
 
                     b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("BarRating.Data.Entities.Notification", b =>
+                {
+                    b.HasOne("BarRating.Data.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BarRating.Data.Entities.Review", b =>

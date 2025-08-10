@@ -1,9 +1,12 @@
-﻿using BarRating.Data.Entities;
+﻿using BarRating.Data;
+using BarRating.Data.Entities;
 using BarRating.Repository;
 using BarRating.Service.HelpfulVote;
+using BarRating.Service.Notification;
 using BarRating.Service.SavedBar;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace BarRating.Controllers
 {
@@ -14,34 +17,63 @@ namespace BarRating.Controllers
         private readonly HelpfulVoteRepository helpfulVoteRepository;
         private readonly UserRepository userRepository;
         private readonly UserManager<Data.Entities.User> userManager;
+        private readonly ApplicationDbContext context;
+        private readonly INotificationService notificationService;
         public HelpfulVoteController(
             IHelpfulVoteService helpfulVoteService,
             ReviewRepository reviewRepository,
             HelpfulVoteRepository helpfulVoteRepository,
             UserRepository userRepository,
-            UserManager<Data.Entities.User> userManager)
+            UserManager<Data.Entities.User> userManager,
+            ApplicationDbContext context,
+            INotificationService notificationService)
         {
             this.helpfulVoteService = helpfulVoteService;
             this.reviewRepository = reviewRepository;
             this.helpfulVoteRepository = helpfulVoteRepository;
             this.userRepository = userRepository;
             this.userManager = userManager;
+            this.context = context;
+            this.notificationService = notificationService;
         }
-        public async Task<IActionResult> HelpfulVote(int reviewId)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> HelpfulVote([FromBody] JsonElement body)
         {
-            Data.Entities.User loggedIn = await userManager.GetUserAsync(User);
-            Data.Entities.Review review = reviewRepository.GetReviewById(reviewId);
-            var isAlreadySaved = helpfulVoteService.HasUserVoted(reviewId, loggedIn.Id);
-            if (isAlreadySaved)
+            if (!body.TryGetProperty("reviewId", out var reviewIdElement) ||
+                !reviewIdElement.TryGetInt32(out int reviewId))
             {
-                await helpfulVoteService.Delete(reviewId, loggedIn.Id);
-                return Json(new { success = true, isSaved = false, message = "Helpful vote removed." });
+                return BadRequest(new { success = false, message = "Invalid reviewId." });
+            }
+
+            var user = await userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var existing = helpfulVoteService.HasUserVoted(reviewId, user.Id);
+            Review review = reviewRepository.GetReviewById(reviewId);
+            if (existing)
+            {
+                await helpfulVoteService.Delete(reviewId, user.Id);
             }
             else
             {
-                helpfulVoteService.Create(reviewId, loggedIn.Id);
-                return Json(new { success = true, message = "Helpful vote added!" });
+                await helpfulVoteService.Create(reviewId, user.Id);
+                await notificationService.Create($"{user.UserName} found your review helpful", review.CreatedById);
             }
+
+            var newCount = context.HelpfulVotes.Count(v => v.ReviewId == reviewId);
+
+            return Json(new
+            {
+                success = true,
+                isSaved = !existing,
+                count = newCount
+            });
+        }
+
+        private int GetHelpfulCount(int reviewId)
+        {
+            return context.HelpfulVotes.Count(h => h.ReviewId == reviewId);
         }
     }
 }

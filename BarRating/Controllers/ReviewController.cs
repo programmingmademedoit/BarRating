@@ -105,6 +105,7 @@ namespace BarRating.Controllers
             await reviewRepository.Delete(editedReview);
             return RedirectToAction("Specify", "Bar", new { barId = model.BarId });
         }
+        [HttpGet]
         public async Task<IActionResult> UserReviews()
         {
             User loggedInUser = await userManager.GetUserAsync(User);
@@ -113,10 +114,15 @@ namespace BarRating.Controllers
                 TempData["Error"] = "You need to log in to view your reviews.";
                 return RedirectToAction("Login", "Account");
             }
-            List<Data.Entities.Review> reviews = reviewRepository.GetAllUserReviews(loggedInUser.Id);
+            List<ReviewViewModel> reviews = await reviewService.GetUserReviews(loggedInUser.Id);
+            return PartialView("UserReviews", reviews);
+        }
+        public async Task<IActionResult> getUserReviews(int userId)
+        {
+            User user = userRepository.GetUserById(userId);
+            List<ReviewViewModel> reviews = await reviewService.GetUserReviews(user.Id);
             return View(reviews);
         }
-
 
         /*public async Task<IActionResult> ReviewsUser(int userId)
         {

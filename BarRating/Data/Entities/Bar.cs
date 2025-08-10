@@ -37,6 +37,6 @@ namespace BarRating.Data.Entities
         public double AverageRating { get; set; }
 
         public List<Review> Reviews { get; set; } = new List<Review>();
-        public ICollection<SavedBar> SavedBars { get; set; } = new List<SavedBar>();
+        public ICollection<SavedBar>? SavedBars { get; set; } = new List<SavedBar>();
     }
 }

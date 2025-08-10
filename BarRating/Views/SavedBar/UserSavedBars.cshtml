@@ -1,0 +1,97 @@
+﻿@model BarRating.Models.Bar.BarsViewModel
+
+<h4>Your Saved Bars</h4>
+@Html.AntiForgeryToken()
+@if (Model?.Bars != null && Model.Bars.Any())
+{
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var bar in Model.Bars)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@bar.Image" class="card-img-top" alt="@bar.Name" style="height: 150px; object-fit: cover;" />
+                    <div class="card-body">
+                        <h6 class="card-title">@bar.Name</h6>
+                        <div class="mb-2">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <span class="text-warning">@(i <= bar.AverageRating ? "★" : "☆")</span>
+                            }
+                            <small class="text-muted ms-1">(@bar.AverageRating.ToString("0.0"))</small>
+                             <small class="text-muted ms-1">(@bar.ReviewsCount) Reviews</small>
+                        </div>
+                        <div class="mb-2">
+                            @if (bar.PriceCategory != BarRating.Data.Enums.PriceCategory.None)
+                            {
+                                <span class="badge bg-primary">@bar.PriceCategory</span>
+                            }
+                            @if (bar.IsVerified)
+                            {
+                                <span class="badge bg-success">Verified</span>
+                            }
+                        </div>
+                        <div class="d-flex justify-content-between mt-auto">
+                            <a asp-controller="Bar" asp-action="Specify" asp-route-barId="@bar.BarId" class="btn btn-outline-primary btn-sm">View</a>
+                            <button type="button"
+                                    class="btn @(bar.IsSaved ? "btn-danger" : "btn-outline-danger") btn-sm mb-2"
+                                    id="saveButton-@bar.BarId"
+                                    onclick="toggleSave(@bar.BarId, this)">
+                                @(bar.IsSaved ? "❤️" : "♡")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">You haven't saved any bars yet.</p>
+}
+@section Scripts {
+    <script>
+               async function toggleSave(barId, button) {
+            const response = await fetch('@Url.Action("SavedBar", "SavedBar")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ barId: barId })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.isSaved) {
+                    button.textContent = '❤️';
+                    button.classList.remove('btn-outline-danger');
+                    button.classList.add('btn-danger');
+                } else {
+                    button.textContent = '♡';
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-outline-danger');
+                }
+                showToast(result.message);
+            } else {
+                alert(result.message);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast bg-success text-white border-0';
+            toast.style = 'position: fixed; top: 20px; right: 20px; z-index: 1055;';
+            toast.innerHTML = `
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>`;
+            document.body.appendChild(toast);
+            const bootstrapToast = new bootstrap.Toast(toast, { autohide: true });
+            bootstrapToast.show();
+            setTimeout(() => toast.remove(), 3000);
+        }
+    </script>
+}

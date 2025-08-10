@@ -1,9 +1,13 @@
-﻿@using BarRating.Data.Entities
-@using BarRating.Data.Enums
-@model BarRating.Models.Bar.EditBarViewModel
+﻿@using BarRating.Models.Bar
+@using Microsoft.AspNetCore.Identity
+@model EditBarViewModel
+
 @{
     ViewData["Title"] = "Edit Bar";
 }
+
+@Html.AntiForgeryToken()
+
 <div class="container mt-5">
     <h2 class="mb-4">Edit Bar</h2>
     <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
@@ -12,7 +16,6 @@
         <div class="row">
             <div class="col-md-8">
 
-                <!-- Basic Info -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
                         <h5>Basic Info</h5>
@@ -43,7 +46,6 @@
                     </div>
                 </div>
 
-                <!-- Location & Contact -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
                         <h5>Location & Contact</h5>
@@ -76,13 +78,12 @@
                     </div>
                 </div>
 
-                <!-- Schedule -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
                         <h5>Schedule</h5>
                     </div>
                     <div class="card-body">
-                        <h6>Regular Hours (Set for Each Day)</h6>
+                        <h6>Regular Hours</h6>
                         <div class="row">
                             @for (int i = 0; i < Model.Schedules.Count; i++)
                             {
@@ -104,12 +105,12 @@
                                         <input type="time"
                                                name="Schedules[@i].Opening"
                                                class="form-control"
-                                               value="@(Model.Schedules[i].Opening.ToString(@"hh\:mm") ?? "")" />
+                                               value="@(Model.Schedules[i].Opening?.ToString("hh\\:mm") ?? "")" />
                                         <span class="input-group-text">to</span>
                                         <input type="time"
                                                name="Schedules[@i].Closing"
                                                class="form-control"
-                                               value="@(Model.Schedules[i].Closing.ToString(@"hh\:mm") ?? "")" />
+                                               value="@(Model.Schedules[i].Closing?.ToString("hh\\:mm") ?? "")" />
                                     </div>
                                 </div>
                             }
@@ -119,7 +120,7 @@
                             document.querySelectorAll('input[type="checkbox"][class="form-check-input"]').forEach(checkbox => {
                                 const day = checkbox.id.split('-')[1];
                                 const hoursDiv = document.getElementById(`hours-${day}`);
-
+                                hoursDiv.style.display = checkbox.checked ? 'none' : 'flex';
                                 checkbox.addEventListener('change', () => {
                                     hoursDiv.style.display = checkbox.checked ? 'none' : 'flex';
                                 });
@@ -138,7 +139,7 @@
                                             <input type="date"
                                                    name="ScheduleOverrides[@i].Date"
                                                    class="form-control"
-                                                   value="@Model.ScheduleOverrides[i].DayOfWeek.ToString("yyyy-MM-dd")"
+                                                   value="@Model.ScheduleOverrides[i].Date.ToString("yyyy-MM-dd")"
                                                    required />
                                         </div>
                                         <div class="col-md-3">
@@ -153,12 +154,12 @@
                                                 <input type="time"
                                                        name="ScheduleOverrides[@i].Opening"
                                                        class="form-control"
-                                                       value="@(Model.ScheduleOverrides[i].Opening.ToString(@"hh\:mm") ?? "")" />
+                                                       value="@(Model.ScheduleOverrides[i].Opening?.ToString("hh\\:mm") ?? "")" />
                                                 <span class="input-group-text">to</span>
                                                 <input type="time"
                                                        name="ScheduleOverrides[@i].Closing"
                                                        class="form-control"
-                                                       value="@(Model.ScheduleOverrides[i].Closing.ToString(@"hh\:mm") ?? "")" />
+                                                       value="@(Model.ScheduleOverrides[i].Closing?.ToString("hh\\:mm") ?? "")" />
                                             </div>
                                         </div>
                                         <div class="col-md-1">
@@ -217,7 +218,6 @@
                     </div>
                 </div>
 
-                <!-- Features -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header">
                         <h5>Features</h5>
@@ -260,16 +260,14 @@
                     </div>
                 </div>
 
-                <!-- Bar Type -->
                 <div class="mb-3">
                     <label for="BarType">Bar Type</label>
-                    <select asp-for="BarType" asp-items="Html.GetEnumSelectList<BarType>()" class="form-control">
+                    <select asp-for="BarType" asp-items="Html.GetEnumSelectList<BarRating.Data.Enums.BarType>()" class="form-control">
                         <option value="">Select a type...</option>
                     </select>
                     <span asp-validation-for="BarType" class="text-danger"></span>
                 </div>
 
-                <!-- Submit -->
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-success btn-lg">Update Bar</button>
                     <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
@@ -280,20 +278,5 @@
 </div>
 
 @section Scripts {
-    <script>
-        // Bootstrap form validation
-        (function () {
-            'use strict';
-            var forms = document.querySelectorAll('.needs-validation');
-            Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                }, false);
-            });
-        })();
-    </script>
+    <partial name="_ValidationScriptsPartial" />
 }

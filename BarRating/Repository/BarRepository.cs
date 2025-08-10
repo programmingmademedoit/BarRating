@@ -14,11 +14,25 @@ namespace BarRating.Repository
                 .Include(b => b.Reviews)
                 .ToList();
         }
+        public List<Bar> GetUserSavedBars(int userId)
+{
+    return context.Bars
+        .Include(b => b.Reviews)
+        .Include(b => b.Schedules)
+        .Include(b => b.ScheduleOverrides)
+        .Include(b => b.SavedBars)
+        .Where(b => b.SavedBars.Any(s => s.CreatedById == userId))
+        .ToList();
+}
         public Bar GetBarById(int id)
         {
             return context.Bars
                 .Include(b => b.CreatedBy)
+                .Include(b => b.Schedules)
+                .Include(b => b.ScheduleOverrides)
+                .Include(b => b.SavedBars)
                 .Include(b => b.Reviews)
+                .ThenInclude(r => r.HelpfulVotes)
                 .ThenInclude(r => r.CreatedBy)
                 .Where(b => b.Id == id)
                 .Single();

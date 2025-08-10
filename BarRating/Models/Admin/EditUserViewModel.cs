@@ -1,4 +1,4 @@
-﻿namespace BarRating.Models.User
+﻿namespace BarRating.Models.Admin
 {
     public class EditUserViewModel
     {

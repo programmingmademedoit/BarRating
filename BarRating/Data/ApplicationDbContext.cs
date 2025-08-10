@@ -18,6 +18,7 @@ namespace BarRating.Data
         public DbSet<SavedBar> SavedBars { get; set; }
         public DbSet<BarSchedule> Schedules { get; set; }
         public DbSet<ScheduleOverride> ScheduleOverrides { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
 
 
